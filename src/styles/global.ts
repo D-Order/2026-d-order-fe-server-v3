@@ -58,7 +58,7 @@ const GlobalStyle = createGlobalStyle`
 }
 
 html {
-  background-color: ${({ theme }) => theme.colors.Orange02};
+  background-color: ${({ theme }) => theme.colors.Orange00};
   display: flex;
   justify-content: center;
   align-items: center;
