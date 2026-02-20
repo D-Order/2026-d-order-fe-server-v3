@@ -4,18 +4,23 @@ declare module "styled-components" {
   export interface DefaultTheme {
     colors: {
       Bg: string;
+      Bg02: string;
       Point: string;
+      Orange00: string;
       Orange01: string;
       Orange02: string;
+      Highlight: string;
       Gray01: string;
       Black01: string;
       Black02: string;
       White: string;
       Black: string;
-      Green01: string;
-      Gray02: string;
+      Success: string;
+      Error: string;
+      Focused: string;
     };
     fonts: {
+      Bold32: Record<string, string>;
       ExtraBold24: Record<string, string>;
       Bold24: Record<string, string>;
       ExtraBold20: Record<string, string>;
