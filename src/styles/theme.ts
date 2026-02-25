@@ -24,6 +24,7 @@ const colors = {
   Black01: "#2A2A2A",
   Black02: "#414141",
   White: "#FFFFFF",
+  BorderGray: "#EEEEEE",
   Black: "#000000",
   Success: "#0F851A",
   Error: "#F03F40",
