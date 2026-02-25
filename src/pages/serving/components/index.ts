@@ -1,0 +1,13 @@
+import Header from "./Header/Header";
+import SelectTap from "./SelectTap/SelectTap";
+import StaffCall from "./StaffCall/StaffCall";
+import StaffCallList from "./StaffCallList/StaffCallList";
+import ResetBtn from "./ResetBtn/ResetBtn";
+
+export default {
+  Header: Header,
+  SelectTap: SelectTap,
+  StaffCall: StaffCall,
+  StaffCallList: StaffCallList,
+  ResetBtn: ResetBtn,
+};
