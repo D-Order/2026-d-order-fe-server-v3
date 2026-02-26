@@ -1,5 +1,4 @@
 import * as S from "./ResetBtn.styled";
-
 import { IMAGE_CONSTANTS } from "@constants/ImageConstants";
 
 interface ResetBtnProps {
