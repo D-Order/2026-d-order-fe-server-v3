@@ -8,6 +8,8 @@ import TimerActivated from "@assets/icons/timer_activated.svg";
 import TimerUnactivated from "@assets/icons/timer_unactivated.svg";
 import ResetBtn from "@assets/icons/reset.svg";
 
+import FilterIcon from "@assets/icons/filter_icon.svg";
+
 import sadKokkiri from "@assets/images/sadKokkiri.png";
 
 export const IMAGE_CONSTANTS = {
@@ -23,6 +25,8 @@ export const IMAGE_CONSTANTS = {
     Unactivated: TimerUnactivated,
   },
   ResetBtn: ResetBtn,
+  
+  FilterIcon: FilterIcon,
 
   sadKokkiri: sadKokkiri,
 } as const;
