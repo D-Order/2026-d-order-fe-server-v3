@@ -8,6 +8,10 @@ const ServingPage = () => {
         "StaffServe"
     );
 
+    // 바텀시트 상태
+    const [isMenuFilterOpen, setIsMenuFilterOpen] = useState(false);
+    const [isTableFilterOpen, setIsTableFilterOpen] = useState(false);
+
     //리셋버튼 표기
     const [isVisible, setIsVisible] = useState(true);
     useEffect(() => {
@@ -90,7 +94,10 @@ const ServingPage = () => {
             activeTab={activeTab}
             onTabChange={handleTabChange}
         />
-        <components.FilterBtn />
+        <components.FilterBtn 
+                onMenuClick={() => setIsMenuFilterOpen(true)}
+                onTableClick={() => setIsTableFilterOpen(true)}
+        />
         {activeTab === "StaffServe" && (
             <components.StaffCallList StaffCallList={StaffServeList} />
         )}
@@ -98,6 +105,14 @@ const ServingPage = () => {
             <components.StaffCallList StaffCallList={StaffCallList} />
         )}
         <components.ResetBtn isVisible={isVisible} />
+        
+        {/* 필터링 바텀시트 */}
+        {isMenuFilterOpen && (
+            <components.MenuFilterSheet onClose={() => setIsMenuFilterOpen(false)} />
+        )}
+        {isTableFilterOpen && (
+            <components.TableFilterSheet onClose={() => setIsTableFilterOpen(false)} />
+        )}
         </S.Wrapper>
     );
 };

@@ -5,6 +5,8 @@ import StaffCallList from "./StaffCallList/StaffCallList";
 import ResetBtn from "./ResetBtn/ResetBtn";
 
 import FilterBtn from "./FilterBtn/FilterBtn";
+import MenuFilterSheet from "./FilterSheet/MenuFilterSheet";
+import TableFilterSheet from "./FilterSheet/TableFilterSheet";
 
 export default {
   Header: Header,
@@ -13,4 +15,6 @@ export default {
   StaffCallList: StaffCallList,
   ResetBtn: ResetBtn,
   FilterBtn: FilterBtn,
+  MenuFilterSheet: MenuFilterSheet,
+  TableFilterSheet: TableFilterSheet,
 };
