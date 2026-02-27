@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export const Wrapper = styled.button`
+export const Wrapper = styled.button<{ $isVisible: boolean }>`
   position: fixed;
   bottom: 2.5rem;
   left: 50%;
@@ -22,6 +22,12 @@ export const Wrapper = styled.button`
   box-shadow: 0 10px 20px 0 rgba(255, 110, 63, 0.15);
   backdrop-filter: blur(5px);
   cursor: pointer;
+
+  /* 애니메이션 로직 */
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
+  visibility: ${({ $isVisible }) => ($isVisible ? "visible" : "hidden")};
+  pointer-events: ${({ $isVisible }) => ($isVisible ? "auto" : "none")};
 `;
 
 export const ResetBtnIcon = styled.img`
