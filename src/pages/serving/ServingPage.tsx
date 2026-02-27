@@ -94,10 +94,15 @@ const ServingPage = () => {
             activeTab={activeTab}
             onTabChange={handleTabChange}
         />
-        <components.FilterBtn 
-                onMenuClick={() => setIsMenuFilterOpen(true)}
-                onTableClick={() => setIsTableFilterOpen(true)}
-        />
+        
+        {/* StaffServe 탭일 때만 필터링 버튼 렌더링 */}
+        {activeTab === "StaffServe" && (
+            <components.FilterBtn 
+                    onMenuClick={() => setIsMenuFilterOpen(true)}
+                    onTableClick={() => setIsTableFilterOpen(true)}
+            />
+        )}
+
         {activeTab === "StaffServe" && (
             <components.StaffCallList StaffCallList={StaffServeList} />
         )}
