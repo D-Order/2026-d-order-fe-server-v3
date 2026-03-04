@@ -10,6 +10,7 @@ interface LoginInputProps {
   placeholder?: string;
   error?: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFocus?: () => void;
 }
 
 const LoginInput: React.FC<LoginInputProps> = ({
@@ -19,6 +20,7 @@ const LoginInput: React.FC<LoginInputProps> = ({
   placeholder,
   error,
   onChange,
+  onFocus,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
@@ -32,6 +34,7 @@ const LoginInput: React.FC<LoginInputProps> = ({
           value={value}
           placeholder={placeholder}
           onChange={onChange}
+          onFocus={onFocus}
         />
         {isPassword && !error ? (
           <S.Icon
