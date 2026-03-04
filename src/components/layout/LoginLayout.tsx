@@ -1,17 +1,15 @@
 import { Outlet } from "react-router-dom";
 import styled from "styled-components";
 
-import Header from "@components/header/Header";
-const DefaultLayout = () => {
+const LoginLayout = () => {
   return (
     <Wrapper>
-      <Header />
       <Outlet />
     </Wrapper>
   );
 };
 
-export default DefaultLayout;
+export default LoginLayout;
 
 const Wrapper = styled.section`
   display: flex;

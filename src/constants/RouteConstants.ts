@@ -1,5 +1,5 @@
 export const ROUTE_CONSTANTS = {
   HOME: "/",
-  LOGIN: "/login",
+  LOGIN: "/",
   SERVING: "/serving",
 } as const;
