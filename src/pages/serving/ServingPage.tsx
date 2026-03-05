@@ -89,7 +89,6 @@ const ServingPage = () => {
 
   return (
     <S.Wrapper>
-      <components.Header />
       <components.SelectTap
         activeTab={activeTab}
         onTabChange={handleTabChange}
