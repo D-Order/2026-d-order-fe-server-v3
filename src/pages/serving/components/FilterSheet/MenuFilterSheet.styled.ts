@@ -51,6 +51,16 @@ export const GridContainer = styled.div`
     margin-bottom: 2rem;
     max-height: 50vh;
     overflow-y: auto;
+
+    &::-webkit-scrollbar {
+        width: 0.25rem; /* 스크롤바 너비 */
+    }
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+    display: none;
+    }
 `;
 
 export const MenuItem = styled.button<{ $isSelected: boolean }>`
