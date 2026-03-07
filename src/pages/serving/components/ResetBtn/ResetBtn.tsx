@@ -3,11 +3,12 @@ import { IMAGE_CONSTANTS } from "@constants/ImageConstants";
 
 interface ResetBtnProps {
   isVisible: boolean;
+  onClick?: () => void;
 }
 
-const ResetBtn = ({ isVisible }: ResetBtnProps) => {
+const ResetBtn = ({ isVisible, onClick }: ResetBtnProps) => {
   return (
-    <S.Wrapper $isVisible={isVisible}>
+    <S.Wrapper $isVisible={isVisible} onClick={onClick}>
       <S.ResetBtnIcon src={IMAGE_CONSTANTS.ResetBtn} />
       테이블 초기화
     </S.Wrapper>

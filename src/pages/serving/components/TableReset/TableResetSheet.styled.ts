@@ -23,7 +23,7 @@ export const SheetContainer = styled.div`
   max-width: 500px;
   background-color: ${({ theme }) => theme.colors?.White || "#FFFFFF"};
   border-radius: 1.5rem 1.5rem 0 0;
-  padding: 1rem 1.5rem 2rem 1.5rem;
+  padding: 0.5rem 0.75rem 1.5rem;
   box-sizing: border-box;
   animation: ${slideUp} 0.3s ease-out;
   display: flex;
@@ -35,33 +35,41 @@ export const HandleBar = styled.div`
   height: 0.25rem;
   background-color: #e0e0e0;
   border-radius: 2px;
-  margin: 0 auto 1.5rem auto;
+  margin: 0 auto 1.625rem auto;
 `;
 
-export const Title = styled.h2`
-  font: ${({ theme }) => theme.fonts?.Bold20 || "700 20px sans-serif"};
-  margin: 0 0 1.5rem 0;
-`;
+// export const Title = styled.h2`
+//   font: ${({ theme }) => theme.fonts?.Bold20 || "700 20px sans-serif"};
+//   margin: 0 0 1.5rem 0;
+// `;
 
 export const InputBox = styled.div`
   width: 100%;
   height: 3.5rem;
   border-radius: 0.75rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid rgba(192, 192, 192, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  font: ${({ theme }) => theme.fonts?.SemiBold16 || "600 20px sans-serif"};
-  color: ${({ theme }) => theme.colors?.Black || "#000000"};
-  background-color: ${({ theme }) => theme.colors?.White || "#FFFFFF"};
+  background-color: ${({ theme }) => theme.colors.Bg};
   margin-bottom: 2rem;
+`;
+
+export const Placeholder = styled.span`
+  ${({ theme }) => theme.fonts.Bold18};
+  color: ${({ theme }) => theme.colors.Focused};
+`;
+
+export const InputText = styled.span`
+  ${({ theme }) => theme.fonts.Bold24};
+  color: ${({ theme }) => theme.colors.Black};
 `;
 
 export const KeypadGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-  margin-bottom: 2rem;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
 `;
 
 export const KeyButton = styled.button`
@@ -69,8 +77,10 @@ export const KeyButton = styled.button`
   border-radius: 0.75rem;
   background-color: #f8f8f8;
   border: none;
-  font: ${({ theme }) => theme.fonts?.Medium16 || "500 20px sans-serif"};
+  ${({ theme }) => theme.fonts.Bold24};
   color: #a0a0a0;
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.05);
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -81,7 +91,7 @@ export const KeyButton = styled.button`
   }
 
   img {
-    width: 2.5rem;
+    width: 3.125rem;
     height: auto;
   }
 `;

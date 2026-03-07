@@ -2,18 +2,20 @@ import * as S from "./ServingPage.styled";
 import { useState, useEffect } from "react";
 
 import components from "./components";
+import TableResetSheet from "./components/TableReset/TableResetSheet";
+import Toast from "../../components/toast/Toast";
 
 const ServingPage = () => {
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"StaffCall" | "StaffServe">(
     "StaffServe"
   );
 
-  // 바텀시트 상태
   const [isMenuFilterOpen, setIsMenuFilterOpen] = useState(false);
   const [isTableFilterOpen, setIsTableFilterOpen] = useState(false);
 
-  //리셋버튼 표기
   const [isVisible, setIsVisible] = useState(true);
+  const [isTableResetOpen, setIsTableResetOpen] = useState(false);
   useEffect(() => {
     let scrollTimer: NodeJS.Timeout;
 
@@ -108,9 +110,26 @@ const ServingPage = () => {
       {activeTab === "StaffCall" && (
         <components.StaffCallList StaffCallList={StaffCallList} />
       )}
-      <components.ResetBtn isVisible={isVisible} />
+      <components.ResetBtn
+        isVisible={isVisible}
+        onClick={() => setIsTableResetOpen(true)}
+      />
 
-      {/* 필터링 바텀시트 */}
+      {isTableResetOpen && (
+        <TableResetSheet
+          onClose={() => setIsTableResetOpen(false)}
+          onSubmit={(tableNumber) => {
+            // API 연결 후 삭제예정
+            console.log("테이블 리셋 요청:", tableNumber);
+            setToastMessage("테이블 초기화가 완료되었어요!");
+          }}
+        />
+      )}
+
+      {toastMessage && (
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+      )}
+
       {isMenuFilterOpen && (
         <components.MenuFilterSheet
           onClose={() => setIsMenuFilterOpen(false)}
