@@ -11,7 +11,10 @@ import ResetBtn from "@assets/icons/reset.svg";
 import FilterIcon from "@assets/icons/filter_icon.svg";
 
 import sadKokkiri from "@assets/images/sadKokkiri.png";
-
+import nomalKokkiri from "@assets/images/nomalKokkiri.png";
+import deleteKey from "@assets/icons/deleteKeyIcon.svg";
+import exclamationIcon from "@assets/icons/exclamationIcon.svg";
+import checkIcon from "@assets/icons/checkIcon.svg";
 export const IMAGE_CONSTANTS = {
   ExitBtn: ExitBtn,
   TabSection: {
@@ -25,8 +28,12 @@ export const IMAGE_CONSTANTS = {
     Unactivated: TimerUnactivated,
   },
   ResetBtn: ResetBtn,
-  
+
   FilterIcon: FilterIcon,
 
   sadKokkiri: sadKokkiri,
+  nomalKokkiri: nomalKokkiri,
+  deleteKey: deleteKey,
+  exclamationIcon: exclamationIcon,
+  checkIcon: checkIcon,
 } as const;
