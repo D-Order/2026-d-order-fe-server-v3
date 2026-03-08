@@ -3,8 +3,11 @@ import { IMAGE_CONSTANTS } from "@constants/ImageConstants";
 import { logoutApi } from "@apis/authApi";
 import { useNavigate } from "react-router-dom";
 import { ROUTE_CONSTANTS } from "@constants/RouteConstants";
+import { useUser } from "@stores/UserContext";
+
 const Header = () => {
-  const boothName = "멋쟁이사자처럼";
+  const { user } = useUser();
+  const boothName = user?.username || "부스이름";
   const navigate = useNavigate();
 
   const handleLogout = async () => {

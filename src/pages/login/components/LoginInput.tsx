@@ -27,8 +27,8 @@ const LoginInput: React.FC<LoginInputProps> = ({
 
   return (
     <S.InputWrapper>
-      <S.Label error={error}>{label}</S.Label>
-      <S.InputBox error={error}>
+      <S.Label $error={error}>{label}</S.Label>
+      <S.InputBox $error={error}>
         <S.Input
           type={isPassword && !showPassword ? "password" : "text"}
           value={value}
