@@ -6,20 +6,21 @@ export const InputWrapper = styled.div`
   gap: 8px;
 `;
 
-export const Label = styled.label<{ error?: boolean }>`
+export const Label = styled.label<{ $error?: boolean }>`
   font: ${({ theme }) => theme.fonts.SemiBold16};
-  color: ${({ error, theme }) =>
-    error ? theme.colors.Error : theme.colors.Orange01};
+  color: ${({ $error, theme }) =>
+    $error ? theme.colors.Error : theme.colors.Orange01};
   margin-bottom: 10px;
 `;
 
-export const InputBox = styled.div<{ error?: boolean }>`
+export const InputBox = styled.div<{ $error?: boolean }>`
   display: flex;
   align-items: center;
   position: relative;
   border-radius: 10px;
   border: 1px solid
-    ${({ error, theme }) => (error ? theme.colors.Error : theme.colors.Focused)};
+    ${({ $error, theme }) =>
+      $error ? theme.colors.Error : theme.colors.Focused};
   background: ${({ theme }) => theme.colors.Bg};
   padding: 15px 17px;
   box-sizing: border-box;
