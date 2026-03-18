@@ -7,12 +7,13 @@ import "react-toastify/dist/ReactToastify.css";
 import useVh from "@hooks/useCalcVh";
 import { RouterProvider } from "react-router-dom";
 import router from "@routes/router";
+import { UserProvider } from "@stores/UserContext";
 
 function App() {
   useVh();
 
   return (
-    <>
+    <UserProvider>
       <ThemeProvider theme={theme}>
         <GlobalStyle />
         <RouterProvider router={router} />
@@ -22,7 +23,7 @@ function App() {
         autoClose={3000}
         hideProgressBar={true}
       />
-    </>
+    </UserProvider>
   );
 }
 

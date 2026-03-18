@@ -1,5 +1,5 @@
 {
-  "name": "2025-d-order-fe-server-v2",
+  "name": "2026-d-order-fe-server-v3",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -30,9 +30,9 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "prettier": "^3.4.2",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",
-    "prettier": "^3.4.2",
     "vite": "^6.3.1",
     "vite-plugin-svgr": "^4.5.0"
   }
