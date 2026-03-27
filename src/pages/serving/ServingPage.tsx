@@ -4,9 +4,12 @@ import { useState, useEffect } from "react";
 import components from "./components";
 import TableResetSheet from "./components/TableReset/TableResetSheet";
 import Toast from "../../components/toast/Toast";
+import { useTableReset } from "@hooks/useTableReset";
 
 const ServingPage = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<"default" | "error">("default");
+  const { resetTable, loading, error, data } = useTableReset();
   const [activeTab, setActiveTab] = useState<"StaffCall" | "StaffServe">(
     "StaffServe"
   );
@@ -118,16 +121,30 @@ const ServingPage = () => {
       {isTableResetOpen && (
         <TableResetSheet
           onClose={() => setIsTableResetOpen(false)}
-          onSubmit={(tableNumber) => {
-            // API 연결 후 삭제예정
-            console.log("테이블 리셋 요청:", tableNumber);
-            setToastMessage("테이블 초기화가 완료되었어요!");
+          onSubmit={async (tableNumber) => {
+            // 1. 훅에서 반환한 결과값을 변수에 담습니다.
+            const result = await resetTable({
+              table_nums: [Number(tableNumber)],
+            });
+
+            // 2. 결과값을 바탕으로 토스트 메시지를 띄웁니다.
+            if (!result.success) {
+              setToastMessage(result.errorMsg || "에러가 발생했습니다.");
+              setToastType("error");
+            } else {
+              setToastMessage(result.payload?.message || "초기화 성공");
+              setToastType("default");
+            }
           }}
         />
       )}
 
       {toastMessage && (
-        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setToastMessage(null)}
+        />
       )}
 
       {isMenuFilterOpen && (
