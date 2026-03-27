@@ -25,6 +25,9 @@ instance.interceptors.response.use(
     if (error.code === "ECONNABORTED") {
       window.location.href = "/error";
     }
+    if (error.response?.status === 401) {
+      window.location.href = "/";
+    }
     return Promise.reject(error);
   }
 );
