@@ -10,7 +10,7 @@ import ServingAcceptModal from "@components/servingacceptmoal/ServingAcceptModal
 const ServingPage = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<"default" | "error">("default");
-  const { resetTable, loading, error, data } = useTableReset();
+  const { resetTable } = useTableReset();
   const [activeTab, setActiveTab] = useState<"StaffCall" | "StaffServe">(
     "StaffServe"
   );
@@ -39,7 +39,7 @@ const ServingPage = () => {
     };
   }, []);
 
-  const [StaffCallList, setStaffCallList] = useState<
+  const [StaffCallList] = useState<
     {
       id: number;
       tableNumber: string;
@@ -64,7 +64,7 @@ const ServingPage = () => {
     },
   ]);
 
-  const [StaffServeList, setStaffServeList] = useState<
+  const [StaffServeList] = useState<
     {
       id: number;
       tableNumber: string;
