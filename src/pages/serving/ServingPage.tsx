@@ -5,11 +5,12 @@ import components from "./components";
 import TableResetSheet from "./components/TableReset/TableResetSheet";
 import Toast from "../../components/toast/Toast";
 import { useTableReset } from "@hooks/useTableReset";
+import ServingAcceptModal from "@components/servingacceptmoal/ServingAcceptModal";
 
 const ServingPage = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<"default" | "error">("default");
-  const { resetTable, loading, error, data } = useTableReset();
+  const { resetTable } = useTableReset();
   const [activeTab, setActiveTab] = useState<"StaffCall" | "StaffServe">(
     "StaffServe"
   );
@@ -38,7 +39,7 @@ const ServingPage = () => {
     };
   }, []);
 
-  const [StaffCallList, setStaffCallList] = useState<
+  const [StaffCallList] = useState<
     {
       id: number;
       tableNumber: string;
@@ -63,7 +64,7 @@ const ServingPage = () => {
     },
   ]);
 
-  const [StaffServeList, setStaffServeList] = useState<
+  const [StaffServeList] = useState<
     {
       id: number;
       tableNumber: string;
@@ -122,12 +123,10 @@ const ServingPage = () => {
         <TableResetSheet
           onClose={() => setIsTableResetOpen(false)}
           onSubmit={async (tableNumber) => {
-            // 1. 훅에서 반환한 결과값을 변수에 담습니다.
             const result = await resetTable({
               table_nums: [Number(tableNumber)],
             });
 
-            // 2. 결과값을 바탕으로 토스트 메시지를 띄웁니다.
             if (!result.success) {
               setToastMessage(result.errorMsg || "에러가 발생했습니다.");
               setToastType("error");
@@ -157,6 +156,10 @@ const ServingPage = () => {
           onClose={() => setIsTableFilterOpen(false)}
         />
       )}
+
+      <ServingAcceptModal />
+      {/* <ServingAcceptModal variant="payment" /> */}
+      {/* <ServingAcceptModal variant="serviceClick" /> */}
     </S.Wrapper>
   );
 };

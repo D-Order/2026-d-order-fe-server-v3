@@ -10,7 +10,7 @@ interface StaffCallProps {
   active: boolean;
 }
 const StaffCall = (staffCallProps: StaffCallProps) => {
-  const { id, tableNumber, request, waitingTime, active } = staffCallProps;
+  const { tableNumber, request, waitingTime, active } = staffCallProps;
   return (
     <S.Wrapper>
       <S.LeftSection>
