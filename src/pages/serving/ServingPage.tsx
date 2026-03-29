@@ -5,6 +5,7 @@ import components from "./components";
 import TableResetSheet from "./components/TableReset/TableResetSheet";
 import Toast from "../../components/toast/Toast";
 import { useTableReset } from "@hooks/useTableReset";
+import ServingAcceptModal from "@components/servingacceptmoal/ServingAcceptModal";
 
 import StaffServe from "./components/StaffServe/StaffServe";
 
@@ -37,8 +38,7 @@ const ServingPage = () => {
     };
   }, []);
 
-  // 태준이형꺼
-  const [StaffCallList, setStaffCallList] = useState<
+  const [StaffCallList] = useState<
     {
       id: number;
       tableNumber: string;
@@ -106,6 +106,11 @@ const ServingPage = () => {
           onClose={() => setToastMessage(null)}
         />
       )}
+
+
+      <ServingAcceptModal />
+      {/* <ServingAcceptModal variant="payment" /> */}
+      {/* <ServingAcceptModal variant="serviceClick" /> */}
     </S.Wrapper>
   );
 };
