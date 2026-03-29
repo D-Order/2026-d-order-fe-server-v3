@@ -6,25 +6,24 @@ import TableResetSheet from "./components/TableReset/TableResetSheet";
 import Toast from "../../components/toast/Toast";
 import { useTableReset } from "@hooks/useTableReset";
 
+import StaffServe from "./components/StaffServe/StaffServe";
+
 const ServingPage = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<"default" | "error">("default");
   const { resetTable, loading, error, data } = useTableReset();
-  const [activeTab, setActiveTab] = useState<"StaffCall" | "StaffServe">(
-    "StaffServe"
-  );
-
-  const [isMenuFilterOpen, setIsMenuFilterOpen] = useState(false);
-  const [isTableFilterOpen, setIsTableFilterOpen] = useState(false);
-
+  
+  const [activeTab, setActiveTab] = useState<"StaffCall" | "StaffServe">("StaffServe");
   const [isVisible, setIsVisible] = useState(true);
   const [isTableResetOpen, setIsTableResetOpen] = useState(false);
+
+  const [serveCount, setServeCount] = useState(0);
+
   useEffect(() => {
     let scrollTimer: NodeJS.Timeout;
 
     const handleScroll = () => {
       setIsVisible(false);
-      // 타이머 설정 (새로운 조정 없으면 다시 보이게) -> 지금은 200ms
       clearTimeout(scrollTimer);
       scrollTimer = setTimeout(() => {
         setIsVisible(true);
@@ -38,6 +37,7 @@ const ServingPage = () => {
     };
   }, []);
 
+  // 태준이형꺼
   const [StaffCallList, setStaffCallList] = useState<
     {
       id: number;
@@ -47,45 +47,8 @@ const ServingPage = () => {
       active: boolean;
     }[]
   >([
-    {
-      id: 1,
-      tableNumber: "T18",
-      request: "결제확인요청",
-      waitingTime: 10,
-      active: true,
-    },
-    {
-      id: 2,
-      tableNumber: "T19",
-      request: "결제확인요청",
-      waitingTime: 10,
-      active: false,
-    },
-  ]);
-
-  const [StaffServeList, setStaffServeList] = useState<
-    {
-      id: number;
-      tableNumber: string;
-      request: string;
-      waitingTime: number;
-      active: boolean;
-    }[]
-  >([
-    {
-      id: 1,
-      tableNumber: "T20",
-      request: "서빙요청",
-      waitingTime: 10,
-      active: true,
-    },
-    {
-      id: 2,
-      tableNumber: "T21",
-      request: "서빙요청",
-      waitingTime: 10,
-      active: false,
-    },
+    { id: 1, tableNumber: "T18", request: "결제확인요청", waitingTime: 10, active: true },
+    { id: 2, tableNumber: "T19", request: "결제확인요청", waitingTime: 10, active: false },
   ]);
 
   const handleTabChange = (tab: "StaffCall" | "StaffServe") => {
@@ -94,25 +57,24 @@ const ServingPage = () => {
 
   return (
     <S.Wrapper>
-      <components.SelectTap
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
+      {/* 상단 탭 (개수 전달) */}
+      <components.SelectTap 
+        activeTab={activeTab} 
+        onTabChange={handleTabChange} 
+        serveCount={serveCount} // 근우 서빙 개수 반영 태준이형 직원호출 반영해주세용
       />
 
-      {/* StaffServe 탭일 때만 필터링 버튼 렌더링 */}
+      {/* 🌟 근우 서빙요청 탭이 활성화되었을 때 */}
       {activeTab === "StaffServe" && (
-        <components.FilterBtn
-          onMenuClick={() => setIsMenuFilterOpen(true)}
-          onTableClick={() => setIsTableFilterOpen(true)}
-        />
+        <StaffServe onUpdateServeCount={setServeCount} />
       )}
 
-      {activeTab === "StaffServe" && (
-        <components.StaffCallList StaffCallList={StaffServeList} />
-      )}
+      {/* 태준이형 직원호출 탭 */}
       {activeTab === "StaffCall" && (
         <components.StaffCallList StaffCallList={StaffCallList} />
       )}
+
+      {/* 하단 공통 컴포넌트 유지 (초기화 버튼 및 시트) */}
       <components.ResetBtn
         isVisible={isVisible}
         onClick={() => setIsTableResetOpen(true)}
@@ -122,12 +84,10 @@ const ServingPage = () => {
         <TableResetSheet
           onClose={() => setIsTableResetOpen(false)}
           onSubmit={async (tableNumber) => {
-            // 1. 훅에서 반환한 결과값을 변수에 담습니다.
             const result = await resetTable({
               table_nums: [Number(tableNumber)],
             });
 
-            // 2. 결과값을 바탕으로 토스트 메시지를 띄웁니다.
             if (!result.success) {
               setToastMessage(result.errorMsg || "에러가 발생했습니다.");
               setToastType("error");
@@ -144,17 +104,6 @@ const ServingPage = () => {
           message={toastMessage}
           type={toastType}
           onClose={() => setToastMessage(null)}
-        />
-      )}
-
-      {isMenuFilterOpen && (
-        <components.MenuFilterSheet
-          onClose={() => setIsMenuFilterOpen(false)}
-        />
-      )}
-      {isTableFilterOpen && (
-        <components.TableFilterSheet
-          onClose={() => setIsTableFilterOpen(false)}
         />
       )}
     </S.Wrapper>

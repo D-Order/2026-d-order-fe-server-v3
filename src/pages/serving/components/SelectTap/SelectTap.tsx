@@ -5,9 +5,10 @@ import { IMAGE_CONSTANTS } from "@constants/ImageConstants";
 interface SelectTapProps {
   activeTab: "StaffCall" | "StaffServe";
   onTabChange: (tab: "StaffCall" | "StaffServe") => void;
+  serveCount?: number;
 }
 
-const SelectTap = ({ activeTab, onTabChange }: SelectTapProps) => {
+const SelectTap = ({ activeTab, onTabChange, serveCount = 0}: SelectTapProps) => {
   const handleTabClick = (tab: "StaffCall" | "StaffServe") => {
     onTabChange(tab);
   };
@@ -27,7 +28,8 @@ const SelectTap = ({ activeTab, onTabChange }: SelectTapProps) => {
             }
           />
           <S.ButtonText $active={activeTab === "StaffServe"}>
-            서빙요청 (4)
+            {/* 🌟 수정: 하드코딩 지우고 받아온 데이터 반영 */}
+            서빙요청 ({serveCount})
           </S.ButtonText>
         </S.Button>
         <S.Button
