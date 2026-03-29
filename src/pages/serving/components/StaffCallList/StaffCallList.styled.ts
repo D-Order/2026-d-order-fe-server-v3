@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const Wrapper = styled.div`
   position: relative;
   width: 100%;
-  height: calc(100dvh - 10rem);
+  height: fit-content;
   background-color: ${({ theme }) => theme.colors.Bg};
   box-sizing: border-box;
   padding: 1rem;
