@@ -16,7 +16,7 @@ export const Wrapper = styled.div`
   opacity: 0.9;
 
   backdrop-filter: blur(10px);
-  z-index: 0;
+  z-index: 1;
 `;
 
 export const TopSection = styled.div`
