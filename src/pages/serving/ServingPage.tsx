@@ -28,6 +28,14 @@ const ServingPage = () => {
 
   const [isVisible, setIsVisible] = useState(true);
   const [isTableResetOpen, setIsTableResetOpen] = useState(false);
+
+  // "몇 분 전" 표기를 WS 없이도 최신으로 유지 (interval 1개만)
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTick(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
   useEffect(() => {
     let scrollTimer: NodeJS.Timeout;
 
@@ -294,6 +302,7 @@ const ServingPage = () => {
       {activeTab === "StaffCall" && (
         <components.StaffCallList
           StaffCallList={StaffCallList}
+          nowTick={nowTick}
           onRefresh={requestStaffCallList}
           refreshing={isStaffCallRefreshing}
           onRequestAccept={(item) => void handleRequestAccept(item)}

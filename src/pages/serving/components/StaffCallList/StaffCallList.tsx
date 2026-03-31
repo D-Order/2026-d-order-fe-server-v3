@@ -19,6 +19,8 @@ export interface StaffCallRowItem {
 
 interface StaffCallListProps {
   StaffCallList: StaffCallRowItem[];
+  /** 상위에서 내려주는 현재시간 tick(ms). 없으면 카드 내부에서 계산 불가 시 fallback */
+  nowTick?: number;
   onRefresh?: () => void;
   refreshing?: boolean;
   /** 수락 클릭 시 모달을 띄우기 위해 전체 항목 전달 */
@@ -37,6 +39,7 @@ const StaffCallList = (StaffCallListProps: StaffCallListProps) => {
           waitingTime={item.waitingTime}
           active={item.active}
           createdAt={item.createdAt}
+          nowTick={StaffCallListProps.nowTick}
           onAccept={
             StaffCallListProps.onRequestAccept &&
             typeof item.tableId === "number" &&
