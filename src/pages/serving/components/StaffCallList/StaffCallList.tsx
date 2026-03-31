@@ -4,14 +4,25 @@ import components from "../index";
 
 import { IMAGE_CONSTANTS } from "@constants/ImageConstants";
 
+export interface StaffCallRowItem {
+  id: number;
+  tableNumber: string;
+  request: string;
+  waitingTime: number;
+  active: boolean;
+  tableId?: number;
+  cartId?: number;
+  callType?: string;
+  status?: string;
+  createdAt?: string;
+}
+
 interface StaffCallListProps {
-  StaffCallList: {
-    id: number;
-    tableNumber: string;
-    request: string;
-    waitingTime: number;
-    active: boolean;
-  }[];
+  StaffCallList: StaffCallRowItem[];
+  onRefresh?: () => void;
+  refreshing?: boolean;
+  /** 수락 클릭 시 모달을 띄우기 위해 전체 항목 전달 */
+  onRequestAccept?: (item: StaffCallRowItem) => void;
 }
 
 const StaffCallList = (StaffCallListProps: StaffCallListProps) => {
@@ -25,6 +36,17 @@ const StaffCallList = (StaffCallListProps: StaffCallListProps) => {
           request={item.request}
           waitingTime={item.waitingTime}
           active={item.active}
+          createdAt={item.createdAt}
+          onAccept={
+            StaffCallListProps.onRequestAccept &&
+            typeof item.tableId === "number" &&
+            item.tableId > 0 &&
+            typeof item.cartId === "number" &&
+            item.cartId > 0 &&
+            item.callType
+              ? () => StaffCallListProps.onRequestAccept?.(item)
+              : undefined
+          }
         />
       ))}
       {StaffCallListProps.StaffCallList.length === 0 && (

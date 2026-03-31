@@ -33,6 +33,7 @@ export const Table = styled.div`
   align-items: center;
 `;
 
+/** $active: 수락 가능(기본 색). 비활성(ACCEPT 등)은 Focused 톤 */
 export const TableNumber = styled.div<{ $active: boolean }>`
   width: fit-content;
   height: fit-content;
@@ -49,7 +50,7 @@ export const TableCall = styled.div<{ $active: boolean }>`
     $active ? theme.colors.Black01 : theme.colors.Focused};
 `;
 
-export const TableWaiting = styled.div<{ $active: boolean }>`
+export const TableWaiting = styled.div<{ $active: boolean; $recent: boolean }>`
   width: fit-content;
   height: fit-content;
   display: flex;
@@ -58,14 +59,18 @@ export const TableWaiting = styled.div<{ $active: boolean }>`
   gap: 0.25rem;
 
   ${({ theme }) => theme.fonts.Bold12};
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.Orange01 : theme.colors.Focused};
+  color: ${({ $active, $recent, theme }) => {
+    if ($recent) return theme.colors.Focused;
+    return $active ? theme.colors.Orange01 : theme.colors.Focused;
+  }};
 `;
 
-export const TableWaitingLogo = styled.img`
+export const TableWaitingLogo = styled.img<{ $muted: boolean }>`
   width: 0.75rem;
   height: 0.75rem;
   object-fit: contain;
+  ${({ $muted }) =>
+    $muted ? "filter: grayscale(1); opacity: 0.85;" : ""}
 `;
 
 export const StaffCallButton = styled.button<{ $active: boolean }>`
@@ -73,6 +78,7 @@ export const StaffCallButton = styled.button<{ $active: boolean }>`
   height: 3rem;
   background-color: ${({ $active, theme }) =>
     $active ? theme.colors.Orange01 : theme.colors.Focused};
+  border: none;
   border-radius: 0.75rem;
   ${({ theme }) => theme.fonts.Bold14};
   color: ${({ theme }) => theme.colors.White};
@@ -80,4 +86,9 @@ export const StaffCallButton = styled.button<{ $active: boolean }>`
   display: flex;
   justify-content: center;
   align-items: center;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;
