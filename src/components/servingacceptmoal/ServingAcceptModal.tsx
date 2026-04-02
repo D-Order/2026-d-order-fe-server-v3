@@ -23,12 +23,16 @@ export interface ServingAcceptModalProps {
   onSlideComplete?: () => void;
   /** 클릭형(serviceClick)에서 서비스 완료가 확정된 시점 */
   onClickComplete?: () => void;
-  /** 좌상단: 호출 수락 취소(서버 staffcall/cancel). 없으면 onClose만 동작 */
+  /** 좌상단: 호출/서빙 수락 취소(서버 cancel). 없으면 onClose만 동작 */
   onCancelAccept?: () => void | Promise<void>;
   /** 좌상단 닫기(뒤로) — onCancelAccept가 없을 때만 사용 */
   onClose?: () => void;
   /** 우상단 주문 취소 */
   onCancelOrder?: () => void;
+  /** 서빙/호출 대상 정보 표시용 (ex: "T4") */
+  tableNumberText?: string;
+  /** 하단 추가 텍스트 (ex: 금액 등, 없으면 생략) */
+  extraContentText?: string;
 }
 
 const ServingAcceptModal = ({
@@ -39,6 +43,8 @@ const ServingAcceptModal = ({
   onCancelAccept,
   onClose,
   onCancelOrder,
+  tableNumberText = "테이블",
+  extraContentText,
 }: ServingAcceptModalProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const [slideProgress, setSlideProgress] = useState(0);
@@ -136,7 +142,7 @@ const ServingAcceptModal = ({
       <S.TopSection>
         <S.TopSectionCloseBtn
           src={IMAGE_CONSTANTS.ServingAcceptModal.CloseBtn}
-          alt="호출 수락 취소"
+          alt="수락 취소 / 뒤로가기"
           onClick={() => {
             if (onCancelAccept) void onCancelAccept();
             else onClose?.();
@@ -160,8 +166,13 @@ const ServingAcceptModal = ({
           src={IMAGE_CONSTANTS.ServingAcceptModal.RejectBtn}
         />
         <S.InformationSectionContent>
-          4번 테이블 <S.InformationSectionDiveider />
-          49,500원
+          {tableNumberText} 
+          {extraContentText && (
+            <>
+              <S.InformationSectionDiveider />
+              {extraContentText}
+            </>
+          )}
         </S.InformationSectionContent>
       </S.InformationSection>
 
@@ -213,7 +224,6 @@ const ServingAcceptModal = ({
             $checkBg={IMAGE_CONSTANTS.ServingAcceptModal.Check}
             onClick={handleClickComplete}
           >
-            {/* 완료 시에만 좌측 별. 미완료 시엔 없어서 텍스트가 아이콘 제외 영역 기준으로만 중앙 정렬됨 */}
             {isCompleted && <S.ClickTrackLeft></S.ClickTrackLeft>}
             <S.ClickTrackCenter $isExiting={isClickExiting}>
               <S.ClickTrackLabel $completed={isCompleted}>
@@ -241,5 +251,3 @@ const ServingAcceptModal = ({
 };
 
 export default ServingAcceptModal;
-
-export type { ServingAcceptModalVariant };
