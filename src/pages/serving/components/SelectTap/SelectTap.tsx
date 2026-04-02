@@ -5,10 +5,18 @@ import { IMAGE_CONSTANTS } from "@constants/ImageConstants";
 interface SelectTapProps {
   activeTab: "StaffCall" | "StaffServe";
   onTabChange: (tab: "StaffCall" | "StaffServe") => void;
-  serveCount?: number;
+  /** 상단 탭에 표시할 건수 (서빙요청) */
+  staffServeCount?: number;
+  /** 상단 탭에 표시할 건수 (직원 호출, WS total) */
+  staffCallCount?: number;
 }
 
-const SelectTap = ({ activeTab, onTabChange, serveCount = 0}: SelectTapProps) => {
+const SelectTap = ({
+  activeTab,
+  onTabChange,
+  staffServeCount = 0,
+  staffCallCount = 0,
+}: SelectTapProps) => {
   const handleTabClick = (tab: "StaffCall" | "StaffServe") => {
     onTabChange(tab);
   };
@@ -28,8 +36,7 @@ const SelectTap = ({ activeTab, onTabChange, serveCount = 0}: SelectTapProps) =>
             }
           />
           <S.ButtonText $active={activeTab === "StaffServe"}>
-            {/* 🌟 수정: 하드코딩 지우고 받아온 데이터 반영 */}
-            서빙요청 ({serveCount})
+            서빙요청 ({staffServeCount})
           </S.ButtonText>
         </S.Button>
         <S.Button
@@ -44,7 +51,7 @@ const SelectTap = ({ activeTab, onTabChange, serveCount = 0}: SelectTapProps) =>
             }
           />
           <S.ButtonText $active={activeTab === "StaffCall"}>
-            직원 호출(4)
+            직원 호출 ({staffCallCount})
           </S.ButtonText>
         </S.Button>
       </S.Buttons>

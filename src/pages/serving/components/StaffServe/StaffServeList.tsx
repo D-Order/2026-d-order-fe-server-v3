@@ -1,19 +1,23 @@
-// components/StaffServe/StaffServeList.tsx
-import * as S from "./StaffServe.styled"; // 기존 스타일 재사용
-import { IMAGE_CONSTANTS } from "@constants/ImageConstants";
-import StaffServeItem from "./StaffServeItem";
+    // components/StaffServe/StaffServeList.tsx
+    import * as S from "./StaffServe.styled"; // 기존 스타일 재사용
+    import { IMAGE_CONSTANTS } from "@constants/ImageConstants";
+    import StaffServeItem from "./StaffServeItem";
 
-interface StaffServeListProps {
-    list: {
-        id: number;
-        tableNumber: string;
-        request: string;
-        waitingTime: number;
-        active: boolean;
-    }[];
-}
+    interface StaffServeUIItem {
+    id: number;
+    tableNumber: string;
+    request: string;
+    waitingTime: number;
+    active: boolean;
+    }
 
-const StaffServeList = ({ list }: StaffServeListProps) => {
+    interface StaffServeListProps {
+    list: StaffServeUIItem[];
+    // 🌟 StaffServe에서 내려받을 이벤트 함수 추가
+    onAcceptServe?: (taskId: number, tableNumber: string) => void;
+    }
+
+    const StaffServeList = ({ list, onAcceptServe }: StaffServeListProps) => {
     return (
         <S.Wrapper>
         {list.map((item) => (
@@ -24,6 +28,8 @@ const StaffServeList = ({ list }: StaffServeListProps) => {
             request={item.request}
             waitingTime={item.waitingTime}
             active={item.active}
+            // 🌟 Item 컴포넌트로 전달
+            onAccept={onAcceptServe}
             />
         ))}
         {list.length === 0 && (
@@ -38,6 +44,6 @@ const StaffServeList = ({ list }: StaffServeListProps) => {
         )}
         </S.Wrapper>
     );
-};
+    };
 
-export default StaffServeList;
+    export default StaffServeList;

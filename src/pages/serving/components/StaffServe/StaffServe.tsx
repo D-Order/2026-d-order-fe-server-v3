@@ -1,24 +1,26 @@
-import { useState, useEffect } from "react";
-import components from "../index";
-import StaffServeList from "./StaffServeList";
-import { getMenuList, MenuItem } from "../../apis/getMenuList"; 
-import { getServingCalls, ServingTaskResponse } from "../../apis/servingApi";
-import { useServingWebSocket } from "../../hooks/useServingWebSocket";
+    import { useState, useEffect } from "react";
+    import components from "../index";
+    import StaffServeList from "./StaffServeList";
+    import { getMenuList, MenuItem } from "../../apis/getMenuList"; 
+    import { getServingCalls, ServingTaskResponse } from "../../apis/servingApi";
+    import { useServingWebSocket } from "../../hooks/useServingWebSocket";
 
-// UI 컴포넌트(StaffServeList)가 요구하는 데이터 타입
-interface StaffServeUIItem {
+    // UI 컴포넌트(StaffServeList)가 요구하는 데이터 타입
+    export interface StaffServeUIItem {
     id: number;
     tableNumber: string;
     request: string;
     waitingTime: number;
     active: boolean;
-}
+    }
 
-interface StaffServeProps {
+    interface StaffServeProps {
     onUpdateServeCount?: (count: number) => void;
-}
+    // 🌟 상위(ServingPage)로 수락 이벤트를 올리기 위한 함수
+    onAcceptServe?: (taskId: number, tableNumber: string) => void;
+    }
 
-const StaffServe = ({ onUpdateServeCount }: StaffServeProps) => {
+    const StaffServe = ({ onUpdateServeCount, onAcceptServe }: StaffServeProps) => {
     const boothId = 1; // TODO: 실제 전역 상태나 Context에서 가져오도록 수정 필요
 
     const [isMenuFilterOpen, setIsMenuFilterOpen] = useState(false);
@@ -54,8 +56,8 @@ const StaffServe = ({ onUpdateServeCount }: StaffServeProps) => {
     
     useEffect(() => {
         if (onUpdateServeCount) {
-            onUpdateServeCount(staffServeList.length);
-            }
+        onUpdateServeCount(staffServeList.length);
+        }
     }, [staffServeList, onUpdateServeCount]);
 
     // 1. [초기 로드] API로 대기 목록 가져오기 & 메뉴 목록 가져오기
@@ -104,8 +106,11 @@ const StaffServe = ({ onUpdateServeCount }: StaffServeProps) => {
             onTableClear={(e) => { e.stopPropagation(); setSelectedTableRanges([]); }}
         />
 
-        {/* 변환된 실제 데이터 리스트를 넘겨줍니다 */}
-        <StaffServeList list={staffServeList} />
+        {/* 🌟 변환된 데이터 리스트와 이벤트 핸들러를 함께 넘겨줍니다 */}
+        <StaffServeList 
+            list={staffServeList} 
+            onAcceptServe={onAcceptServe} 
+        />
 
         {isMenuFilterOpen && (
             <components.MenuFilterSheet
@@ -124,6 +129,6 @@ const StaffServe = ({ onUpdateServeCount }: StaffServeProps) => {
         )}
         </>
     );
-};
+    };
 
-export default StaffServe;
+    export default StaffServe;
