@@ -67,23 +67,23 @@ const TableFilterSheet = ({ onClose, initialRanges, onApply }: TableFilterSheetP
         setRanges((prev) => prev.filter((_, i) => i !== index));
     };
 
-    // 현재 입력 중인 범위를 배열로 확정
-    const confirmRange = () => {
-        if (startTable && endTable) {
-            // 시작 번호가 끝 번호보다 크면 스왑
-            const start = parseInt(startTable, 10);
-            const end = parseInt(endTable, 10);
+    // // 현재 입력 중인 범위를 배열로 확정
+    // const confirmRange = () => {
+    //     if (startTable && endTable) {
+    //         // 시작 번호가 끝 번호보다 크면 스왑
+    //         const start = parseInt(startTable, 10);
+    //         const end = parseInt(endTable, 10);
             
-            const finalStart = Math.min(start, end).toString();
-            const finalEnd = Math.max(start, end).toString();
+    //         const finalStart = Math.min(start, end).toString();
+    //         const finalEnd = Math.max(start, end).toString();
 
-            setRanges((prev) => [...prev, { start: finalStart, end: finalEnd }]);
-            // 입력창 초기화
-            setStartTable("");
-            setEndTable("");
-            setActiveInput("start");
-        }
-    };
+    //         setRanges((prev) => [...prev, { start: finalStart, end: finalEnd }]);
+    //         // 입력창 초기화
+    //         setStartTable("");
+    //         setEndTable("");
+    //         setActiveInput("start");
+    //     }
+    // };
 
     const handleComplete = () => {
         let finalRanges = [...ranges];
@@ -134,10 +134,6 @@ const TableFilterSheet = ({ onClose, initialRanges, onApply }: TableFilterSheetP
                     </S.RangeBox>
                 </S.InputRow>
 
-                {/* 범위 확정 버튼 (선택사항, 입력 편의를 위해 추가) */}
-                {startTable && endTable && (
-                    <button onClick={confirmRange} style={{marginBottom: "10px", padding: "5px"}}>이 범위 추가하기</button>
-                )}
 
                 <S.KeypadGrid>
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
