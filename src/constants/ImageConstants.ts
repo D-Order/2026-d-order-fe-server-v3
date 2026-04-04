@@ -8,7 +8,7 @@ import TimerActivated from "@assets/icons/timer_activated.svg";
 import TimerUnactivated from "@assets/icons/timer_unactivated.svg";
 import ResetBtn from "@assets/icons/reset.svg";
 import CloseBtn from "@assets/icons/servingAcceptModal/backSpace.svg";
-import RejectBtn from "@assets/icons/servingAcceptModal/servingKokkiri.svg";
+import RejectBtn from "@assets/images/servingLion.png";
 import RightArrow from "@assets/icons/servingAcceptModal/RightArrow.svg";
 import servingModalCheckIcon from "@assets/icons/servingAcceptModal/checkIcon.svg";
 import servingModalCheckIcon2 from "@assets/icons/servingAcceptModal/checkIcon2.svg";
@@ -16,8 +16,8 @@ import Check from "@assets/icons/servingAcceptModal/check.png";
 
 import FilterIcon from "@assets/icons/filter_icon.svg";
 
-import sadKokkiri from "@assets/images/sadKokkiri.png";
-import nomalKokkiri from "@assets/images/nomalKokkiri.png";
+import sadKokkiri from "@assets/images/sadLion.png";
+import nomalKokkiri from "@assets/icons/lion.svg";
 import deleteKey from "@assets/icons/deleteKeyIcon.svg";
 import exclamationIcon from "@assets/icons/exclamationIcon.svg";
 import checkIcon from "@assets/icons/checkIcon.svg";

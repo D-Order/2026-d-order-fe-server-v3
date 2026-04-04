@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import MainLogo from "@assets/icons/mainLogo.svg?react"; // SVG 컴포넌트 임포트
+import MainLogo from "@assets/icons/mainLogoV3.svg?react"; // SVG 컴포넌트 임포트
 
 export const Wrapper = styled.main`
   display: flex;
@@ -23,6 +23,7 @@ export const HeaderSection = styled.section`
 export const Title = styled.div`
   ${({ theme }) => theme.fonts.Bold32};
   color: ${({ theme }) => theme.colors.Black02};
+  margin-left: 5px;
 `;
 
 export const Logo = styled(MainLogo)`
