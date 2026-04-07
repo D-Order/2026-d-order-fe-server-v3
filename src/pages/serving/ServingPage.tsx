@@ -1,5 +1,5 @@
 import * as S from "./ServingPage.styled";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import components from "./components";
 import TableResetSheet from "./components/TableReset/TableResetSheet";
@@ -10,6 +10,7 @@ import {
   staffCallAcceptApi,
   staffCallCancelApi,
 } from "../../apis/staffCallApi";
+import { paymentConfirmApi } from "../../apis/cartApi";
 import { useUser } from "@stores/UserContext";
 import ServingAcceptModal from "@components/servingacceptmoal/ServingAcceptModal";
 import { useStaffCallListSocket } from "@hooks/useStaffCallListSocket";
@@ -69,6 +70,7 @@ const ServingPage = () => {
     callType: string;
     status?: string;
     createdAt?: string;
+    tableUsageId?: number;
   }
 
   const mapStaffCallItem = (
@@ -111,9 +113,7 @@ const ServingPage = () => {
       .trim()
       .toUpperCase();
     const isAccepted =
-      statusRaw === "ACCEPTED" ||
-      statusRaw === "ACCEPT" ||
-      statusRaw === "ACCEPTED_BY_STAFF";
+      statusRaw === "ACCEPTED" || statusRaw === "ACCEPTED_BY_STAFF";
 
     const canAccept =
       Number.isFinite(tableId) &&
@@ -134,23 +134,45 @@ const ServingPage = () => {
       callType,
       status: statusRaw || undefined,
       createdAt: (raw as any)?.created_at ?? (raw as any)?.createdAt,
+      // WS payload 위치가 다를 수 있어 후보들을 최대한 커버
+      tableUsageId: (() => {
+        const v =
+          (raw as any)?.table_usage_id ??
+          (raw as any)?.tableUsageId ??
+          (raw as any)?.cart?.table_usage_id ??
+          (raw as any)?.cart?.tableUsageId ??
+          (raw as any)?.cart?.table_usage?.id ??
+          (raw as any)?.table_usage?.id;
+        const n = Number(v);
+        return Number.isFinite(n) && n > 0 ? n : undefined;
+      })(),
     };
   };
 
   const [StaffCallList, setStaffCallList] = useState<StaffCallListItem[]>([]);
   const [staffCallTotal, setStaffCallTotal] = useState<number>(0);
-  
-  // 직원 호출(StaffCall) 모달 데이터
-  const [acceptModalItem, setAcceptModalItem] = useState<StaffCallListItem | null>(null);
-  
-  // 서빙 요청(StaffServe) 모달 데이터
+
+  const [acceptModalItem, setAcceptModalItem] =
+    useState<StaffCallListItem | null>(null);
+  const acceptModalAutoCloseTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (acceptModalAutoCloseTimeoutRef.current) {
+        clearTimeout(acceptModalAutoCloseTimeoutRef.current);
+        acceptModalAutoCloseTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
   const [serveModalItem, setServeModalItem] = useState<{
     taskId: number;
     tableNumber: string;
   } | null>(null);
 
-  const staffCallWsEnabled =
-    activeTab === "StaffCall" && Boolean(user?.booth_id);
+  const staffCallWsEnabled = Boolean(user?.booth_id);
 
   const {
     isRefreshing: isStaffCallRefreshing,
@@ -211,6 +233,7 @@ const ServingPage = () => {
   };
 
   const handleRequestAccept = async (item: {
+    id?: number;
     tableId?: number;
     cartId?: number;
     callType?: string;
@@ -221,7 +244,25 @@ const ServingPage = () => {
       callType: item.callType as string,
     });
     if (ok) {
-      setAcceptModalItem(item as StaffCallListItem);
+      // 목록에서 최신 item을 찾아 모달로 넘김(추가 필드 tableUsageId 등 보존)
+      const latest =
+        typeof item.id === "number"
+          ? StaffCallList.find((x) => x.id === item.id)
+          : undefined;
+      const modalItem = (latest ?? (item as StaffCallListItem)) as StaffCallListItem;
+      setAcceptModalItem(modalItem);
+
+      // PAYMENT_CONFIRM는 슬라이드 완료 후 결제확인 API를 호출해야 하므로 자동 닫기 제외
+      const t = String(modalItem.callType ?? "").trim().toUpperCase();
+      if (t !== "PAYMENT_CONFIRM") {
+        if (acceptModalAutoCloseTimeoutRef.current) {
+          clearTimeout(acceptModalAutoCloseTimeoutRef.current);
+        }
+        acceptModalAutoCloseTimeoutRef.current = setTimeout(() => {
+          acceptModalAutoCloseTimeoutRef.current = null;
+          setAcceptModalItem(null);
+        }, 900);
+      }
     }
   };
 
@@ -252,14 +293,12 @@ const ServingPage = () => {
   };
 
   /* ================= 서빙 요청 (StaffServe) 로직 ================= */
-  
+
   const currentBoothId = user?.booth_id || 1;
 
-  // 1. 서빙 시작 (수락)
   const handleServeCatch = async (taskId: number, tableNumber: string) => {
     try {
-      // 🌟 taskId와 boothId만 전송
-      const resMsg = await servingCatchApi(taskId, currentBoothId); 
+      const resMsg = await servingCatchApi(taskId, currentBoothId);
       setToastMessage(resMsg || "서빙을 시작합니다.");
       setToastType("default");
       setServeModalItem({ taskId, tableNumber });
@@ -273,11 +312,10 @@ const ServingPage = () => {
     }
   };
 
-  // 2. 서빙 완료 (클릭)
   const handleServeComplete = async () => {
     if (!serveModalItem) return;
     try {
-      const resMsg = await servingCompleteApi(serveModalItem.taskId, currentBoothId); 
+      const resMsg = await servingCompleteApi(serveModalItem.taskId, currentBoothId);
       setToastMessage(resMsg || "서빙이 완료되었습니다.");
       setToastType("default");
       setServeModalItem(null);
@@ -287,16 +325,43 @@ const ServingPage = () => {
     }
   };
 
-  // 3. 서빙 취소 (뒤로가기)
   const handleServeCancel = async () => {
     if (!serveModalItem) return;
     try {
-      const resMsg = await servingCancelApi(serveModalItem.taskId, currentBoothId); 
+      const resMsg = await servingCancelApi(serveModalItem.taskId, currentBoothId);
       setToastMessage(resMsg || "서빙을 취소했습니다.");
       setToastType("default");
-      setServeModalItem(null); 
+      setServeModalItem(null);
     } catch (err: any) {
       setToastMessage(err?.response?.data?.message || "서빙 취소 처리에 실패했습니다.");
+      setToastType("error");
+    }
+  };
+
+  const handlePaymentConfirmOrdered = async () => {
+    if (!acceptModalItem) return;
+    const callType = String(acceptModalItem.callType ?? "").trim().toUpperCase();
+    if (callType !== "PAYMENT_CONFIRM") return;
+
+    const tableUsageId = Number(acceptModalItem.tableUsageId);
+    if (!Number.isFinite(tableUsageId) || tableUsageId <= 0) {
+      setToastMessage("table_usage_id가 없어 결제 확인을 진행할 수 없습니다.");
+      setToastType("error");
+      return;
+    }
+
+    try {
+      const res = await paymentConfirmApi({ table_usage_id: tableUsageId });
+      setToastMessage(res.message || "결제가 확인되어 주문이 완료되었습니다.");
+      setToastType("default");
+      setAcceptModalItem(null);
+      requestStaffCallList();
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "결제 확인 처리에 실패했습니다.";
+      setToastMessage(msg);
       setToastType("error");
     }
   };
@@ -366,18 +431,23 @@ const ServingPage = () => {
             callType={acceptModalItem.callType}
             tableNumberText={acceptModalItem.tableNumber}
             onCancelAccept={() => void handleModalCancelAccept()}
+            onSlideComplete={
+              String(acceptModalItem.callType ?? "").trim().toUpperCase() ===
+              "PAYMENT_CONFIRM"
+                ? () => void handlePaymentConfirmOrdered()
+                : undefined
+            }
           />
         </S.AcceptModalLayer>
       )}
 
-      {/* 서빙(StaffServe) 전용 모달 */}
       {serveModalItem && (
         <S.AcceptModalLayer>
           <ServingAcceptModal
             variant="serviceClick"
             tableNumberText={serveModalItem.tableNumber}
-            onClickComplete={() => void handleServeComplete()} 
-            onCancelAccept={() => void handleServeCancel()} 
+            onClickComplete={() => void handleServeComplete()}
+            onCancelAccept={() => void handleServeCancel()}
           />
         </S.AcceptModalLayer>
       )}

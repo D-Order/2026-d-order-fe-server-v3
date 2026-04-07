@@ -15,6 +15,7 @@ export interface StaffCallRowItem {
   callType?: string;
   status?: string;
   createdAt?: string;
+  tableUsageId?: number;
 }
 
 interface StaffCallListProps {
