@@ -87,11 +87,13 @@ export function useStaffCallListSocket(options: UseStaffCallListSocketOptions) {
 
     ws.onmessage = (event) => {
       try {
+        console.log("[StaffCallWS] raw message:", event.data);
         const msg = JSON.parse(event.data as string) as {
           type?: string;
           data?: unknown;
           total?: number;
         };
+        console.log("[StaffCallWS] parsed:", msg);
         if (
           msg.type === "LIST_RESULT" ||
           msg.type === "STAFF_CALL_SNAPSHOT"

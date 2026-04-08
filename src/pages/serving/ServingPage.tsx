@@ -9,8 +9,8 @@ import {
   StaffCallItem,
   staffCallAcceptApi,
   staffCallCancelApi,
+  staffCallCompleteApi,
 } from "../../apis/staffCallApi";
-import { paymentConfirmApi } from "../../apis/cartApi";
 import { useUser } from "@stores/UserContext";
 import ServingAcceptModal from "@components/servingacceptmoal/ServingAcceptModal";
 import { useStaffCallListSocket } from "@hooks/useStaffCallListSocket";
@@ -71,13 +71,14 @@ const ServingPage = () => {
     status?: string;
     createdAt?: string;
     tableUsageId?: number;
+    cartPrice?: number;
   }
 
   const mapStaffCallItem = (
     raw: StaffCallItem,
     index: number
   ): StaffCallListItem => {
-    const id = Number(raw?.id ?? index + 1);
+    const id = Number(raw?.id ?? (raw as any)?.staff_call_id);
     const tableId = Number((raw as any)?.table_id ?? (raw as any)?.tableId);
     const cartId = Number((raw as any)?.cart_id ?? (raw as any)?.cartId);
     const callType = String(
@@ -112,19 +113,24 @@ const ServingPage = () => {
     const statusRaw = String((raw as any)?.status ?? "")
       .trim()
       .toUpperCase();
-    const isAccepted =
-      statusRaw === "ACCEPTED" || statusRaw === "ACCEPTED_BY_STAFF";
+    const isInactive =
+      statusRaw === "ACCEPTED" ||
+      statusRaw === "ACCEPTED_BY_STAFF" ||
+      statusRaw === "COMPLETED";
+
+    const hasValidId = Number.isFinite(id) && id > 0;
 
     const canAccept =
+      hasValidId &&
       Number.isFinite(tableId) &&
       tableId > 0 &&
       Number.isFinite(cartId) &&
       cartId > 0 &&
       callType.trim() !== "" &&
-      !isAccepted;
+      !isInactive;
 
     return {
-      id: Number.isFinite(id) ? id : index + 1,
+      id: hasValidId ? id : 0,
       tableNumber,
       request: callType,
       waitingTime: Number.isFinite(waitingTime) ? waitingTime : 0,
@@ -143,6 +149,11 @@ const ServingPage = () => {
           (raw as any)?.cart?.tableUsageId ??
           (raw as any)?.cart?.table_usage?.id ??
           (raw as any)?.table_usage?.id;
+        const n = Number(v);
+        return Number.isFinite(n) && n > 0 ? n : undefined;
+      })(),
+      cartPrice: (() => {
+        const v = (raw as any)?.cart_price ?? (raw as any)?.cartPrice;
         const n = Number(v);
         return Number.isFinite(n) && n > 0 ? n : undefined;
       })(),
@@ -343,16 +354,13 @@ const ServingPage = () => {
     const callType = String(acceptModalItem.callType ?? "").trim().toUpperCase();
     if (callType !== "PAYMENT_CONFIRM") return;
 
-    const tableUsageId = Number(acceptModalItem.tableUsageId);
-    if (!Number.isFinite(tableUsageId) || tableUsageId <= 0) {
-      setToastMessage("table_usage_id가 없어 결제 확인을 진행할 수 없습니다.");
-      setToastType("error");
-      return;
-    }
-
     try {
-      const res = await paymentConfirmApi({ table_usage_id: tableUsageId });
-      setToastMessage(res.message || "결제가 확인되어 주문이 완료되었습니다.");
+      await staffCallCompleteApi({
+        tableId: acceptModalItem.tableId,
+        cartId: acceptModalItem.cartId,
+        callType: acceptModalItem.callType,
+      });
+      setToastMessage("결제가 확인되어 주문이 완료되었습니다.");
       setToastType("default");
       setAcceptModalItem(null);
       requestStaffCallList();
@@ -430,6 +438,11 @@ const ServingPage = () => {
           <ServingAcceptModal
             callType={acceptModalItem.callType}
             tableNumberText={acceptModalItem.tableNumber}
+            extraContentText={
+              acceptModalItem.cartPrice !== undefined
+                ? `${acceptModalItem.cartPrice.toLocaleString("ko-KR")}원`
+                : undefined
+            }
             onCancelAccept={() => void handleModalCancelAccept()}
             onSlideComplete={
               String(acceptModalItem.callType ?? "").trim().toUpperCase() ===
