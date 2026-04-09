@@ -74,10 +74,7 @@ const ServingPage = () => {
     cartPrice?: number;
   }
 
-  const mapStaffCallItem = (
-    raw: StaffCallItem,
-    index: number
-  ): StaffCallListItem => {
+  const mapStaffCallItem = (raw: StaffCallItem): StaffCallListItem => {
     const id = Number(raw?.id ?? (raw as any)?.staff_call_id);
     const tableId = Number((raw as any)?.table_id ?? (raw as any)?.tableId);
     const cartId = Number((raw as any)?.cart_id ?? (raw as any)?.cartId);
@@ -192,7 +189,7 @@ const ServingPage = () => {
     enabled: staffCallWsEnabled,
     onListUpdate: ({ items, total }) => {
       setStaffCallList(
-        items.map((raw, i) => mapStaffCallItem(raw as StaffCallItem, i))
+        items.map((raw) => mapStaffCallItem(raw as StaffCallItem))
       );
       if (typeof total === "number") {
         setStaffCallTotal(total);
