@@ -1,8 +1,31 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-
 import Header from "@components/header/Header";
+import { useEffect } from "react";
+import { refreshTokenApi } from "@apis/authApi";
+import { ROUTE_CONSTANTS } from "@constants/RouteConstants";
+import { useUser } from "@stores/UserContext";
+
 const DefaultLayout = () => {
+  const navigate = useNavigate();
+  const { setUser } = useUser();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await refreshTokenApi();
+        if (!res.data) {
+          navigate(ROUTE_CONSTANTS.LOGIN, { replace: true });
+        } else {
+          setUser({ username: res.data.username, booth_id: res.data.booth_id });
+        }
+      } catch {
+        navigate(ROUTE_CONSTANTS.LOGIN, { replace: true });
+      }
+    };
+    checkAuth();
+  }, [navigate]);
+
   return (
     <Wrapper>
       <Header />

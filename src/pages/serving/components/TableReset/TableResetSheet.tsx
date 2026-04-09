@@ -4,7 +4,7 @@ import * as S from "./TableResetSheet.styled";
 import { IMAGE_CONSTANTS } from "@constants/ImageConstants";
 interface TableResetSheetProps {
   onClose: () => void;
-  onSubmit: (tableNumber: string) => void;
+  onSubmit: (tableNumber: string) => Promise<void>;
 }
 
 const TableResetSheet = ({ onClose, onSubmit }: TableResetSheetProps) => {
@@ -18,9 +18,9 @@ const TableResetSheet = ({ onClose, onSubmit }: TableResetSheetProps) => {
     setTableNumber((prev) => prev.slice(0, -1));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (tableNumber) {
-      onSubmit(tableNumber);
+      await onSubmit(tableNumber);
       onClose();
     }
   };

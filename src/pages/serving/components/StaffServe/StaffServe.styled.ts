@@ -1,9 +1,16 @@
+// components/StaffServe/StaffServeItem.styled.ts (또는 해당 스타일 파일)
 import styled from "styled-components";
 
+// ==========================================
+// StaffServeItem 컴포넌트용 스타일
+// ==========================================
+
 export const Wrapper = styled.div`
-  background-color: ${({ theme }) => theme.colors.White};
+  background-color: ${({ theme }) => theme.colors.Bg};
   width: 100%;
   height: fit-content;
+  // 아코야 중앙으로 와
+  min-height: 60vh; 
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -12,7 +19,6 @@ export const Wrapper = styled.div`
   padding: 1.25rem 1rem;
   border-radius: 1rem;
   gap: 0.625rem;
-  box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.05);
 `;
 
 export const LeftSection = styled.div`
@@ -33,7 +39,6 @@ export const Table = styled.div`
   align-items: center;
 `;
 
-/** $active: 수락 가능(기본 색). 비활성(ACCEPT 등)은 Focused 톤 */
 export const TableNumber = styled.div<{ $active: boolean }>`
   width: fit-content;
   height: fit-content;
@@ -50,7 +55,8 @@ export const TableCall = styled.div<{ $active: boolean }>`
     $active ? theme.colors.Black01 : theme.colors.Focused};
 `;
 
-export const TableWaiting = styled.div<{ $active: boolean; $recent: boolean }>`
+// tsx에서 $recent를 넘겨주지 않으므로 $active만 받도록 수정
+export const TableWaiting = styled.div<{ $active: boolean }>`
   width: fit-content;
   height: fit-content;
   display: flex;
@@ -59,18 +65,15 @@ export const TableWaiting = styled.div<{ $active: boolean; $recent: boolean }>`
   gap: 0.25rem;
 
   ${({ theme }) => theme.fonts.Bold12};
-  color: ${({ $active, $recent, theme }) => {
-    if ($recent) return theme.colors.Focused;
-    return $active ? theme.colors.Orange01 : theme.colors.Focused;
-  }};
+  color: ${({ $active, theme }) => 
+    $active ? theme.colors.Orange01 : theme.colors.Focused};
 `;
 
-export const TableWaitingLogo = styled.img<{ $muted: boolean }>`
+// tsx에서 $muted 대신 이미지 src 자체를 교체하므로 불필요한 props 제거
+export const TableWaitingLogo = styled.img`
   width: 0.75rem;
   height: 0.75rem;
   object-fit: contain;
-  ${({ $muted }) =>
-    $muted ? "filter: grayscale(1); opacity: 0.85;" : ""}
 `;
 
 export const StaffCallButton = styled.button<{ $active: boolean }>`
@@ -91,4 +94,47 @@ export const StaffCallButton = styled.button<{ $active: boolean }>`
     opacity: 0.6;
     cursor: not-allowed;
   }
+`;
+
+// ==========================================
+// 기존 스타일 유지 (리스트 컨테이너 및 NoData 등)
+// ==========================================
+
+// 기존 Wrapper는 개별 Item의 Wrapper와 이름이 충돌하므로 ListWrapper로 변경했습니다.
+// (부모 컴포넌트에서 리스트를 감쌀 때 사용하시면 됩니다)
+export const ListWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  height: calc(100dvh - 12rem);
+  background-color: ${({ theme }) => theme.colors.Bg};
+  box-sizing: border-box;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+export const NoDataWrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  gap: 2rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+`;
+
+export const NoDataImage = styled.img`
+  width: 10rem;
+  height: 6rem;
+  object-fit: contain;
+`;
+
+export const NoDataText = styled.p`
+  ${({ theme }) => theme.fonts.ExtraBold24};
+  color: ${({ theme }) => theme.colors.Focused};
+  text-align: center;
+  line-height: 2;
+  white-space: pre-line;
 `;

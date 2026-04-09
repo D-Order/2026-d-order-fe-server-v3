@@ -110,3 +110,36 @@ export const SubmitButton = styled.button`
     border: none;
     cursor: pointer;
 `;
+
+// 가로 스크롤 및 숨김 처리
+export const SelectedListScroll = styled.div`
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 8px;
+    
+    /* 스크롤바 숨기기 (선택사항) */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+`;
+
+export const SelectedPill = styled.div`
+    display: flex;
+    align-items: center;
+    padding: 4px 12px;
+    border: 1px solid #FF5C39; /* 메인 테마색 */
+    color: #FF5C39;
+    border-radius: 16px;
+    font-size: 14px;
+`;
+
+export const PillDeleteBtn = styled.button`
+    margin-left: 6px;
+    background: none;
+    border: none;
+    color: #c4c4c4;
+    cursor: pointer;
+    /* 아이콘 세부 스타일 지정 */
+`;

@@ -4,6 +4,7 @@ import LoginLayout from "@components/layout/LoginLayout";
 import { ROUTE_CONSTANTS } from "@constants/RouteConstants";
 import LoginPage from "@pages/login/LoginPage";
 import ServingPage from "@pages/serving/ServingPage";
+// import ProtectedRoute from "./ProtectedRoute";
 
 const router = createBrowserRouter([
   {
@@ -12,9 +13,14 @@ const router = createBrowserRouter([
     children: [{ index: true, element: <LoginPage /> }],
   },
   {
-    path: ROUTE_CONSTANTS.HOME,
+    path: ROUTE_CONSTANTS.SERVING,
     element: <DefaultLayout />,
-    children: [{ path: ROUTE_CONSTANTS.SERVING, element: <ServingPage /> }],
+    children: [
+      {
+        index: true,
+        element: <ServingPage />,
+      },
+    ],
   },
 ]);
 
