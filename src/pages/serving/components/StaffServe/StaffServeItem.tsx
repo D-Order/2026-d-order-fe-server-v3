@@ -21,7 +21,7 @@ const StaffServeItem = ({
   onAccept,
 }: StaffServeItemProps) => {
   return (
-    <S.Wrapper>
+    <S.ItemWrapper>
       <S.LeftSection>
         <S.Table>
           <S.TableNumber $active={active}>{tableNumber}</S.TableNumber>
@@ -49,7 +49,7 @@ const StaffServeItem = ({
       >
         수락
       </S.StaffCallButton>
-    </S.Wrapper>
+    </S.ItemWrapper>
   );
 };
 
