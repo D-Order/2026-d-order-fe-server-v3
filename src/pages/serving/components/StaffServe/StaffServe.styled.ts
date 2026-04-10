@@ -6,11 +6,21 @@ import styled from "styled-components";
 // ==========================================
 
 export const Wrapper = styled.div`
-  background-color: ${({ theme }) => theme.colors.Bg};
+  position: relative;
   width: 100%;
   height: fit-content;
-  // 아코야 중앙으로 와
-  min-height: 60vh; 
+  background-color: ${({ theme }) => theme.colors.Bg};
+  box-sizing: border-box;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+export const ItemWrapper = styled.div`
+  background-color: ${({ theme }) => theme.colors.White};
+  width: 100%;
+  height: fit-content;
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -19,6 +29,7 @@ export const Wrapper = styled.div`
   padding: 1.25rem 1rem;
   border-radius: 1rem;
   gap: 0.625rem;
+  box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.05);
 `;
 
 export const LeftSection = styled.div`
@@ -117,6 +128,7 @@ export const ListWrapper = styled.div`
 export const NoDataWrapper = styled.div`
   width: 100%;
   height: 100%;
+  min-height: 50vh;
   display: flex;
   gap: 2rem;
   flex-direction: column;
