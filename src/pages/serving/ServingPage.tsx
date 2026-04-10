@@ -17,6 +17,7 @@ import { useStaffCallListSocket } from "@hooks/useStaffCallListSocket";
 
 import StaffServe from "./components/StaffServe/StaffServe";
 
+// 🌟 경로 수정 완료
 import {
   servingCatchApi,
   servingCompleteApi,
@@ -302,11 +303,9 @@ const ServingPage = () => {
 
   /* ================= 서빙 요청 (StaffServe) 로직 ================= */
 
-  const currentBoothId = user?.booth_id || 1;
-
   const handleServeCatch = async (taskId: number, tableNumber: string) => {
     try {
-      const resMsg = await servingCatchApi(taskId, currentBoothId);
+      const resMsg = await servingCatchApi(taskId);
       setToastMessage(resMsg || "서빙을 시작합니다.");
       setToastType("default");
       setServeModalItem({ taskId, tableNumber });
@@ -323,7 +322,7 @@ const ServingPage = () => {
   const handleServeComplete = async () => {
     if (!serveModalItem) return;
     try {
-      const resMsg = await servingCompleteApi(serveModalItem.taskId, currentBoothId);
+      const resMsg = await servingCompleteApi(serveModalItem.taskId);      
       setToastMessage(resMsg || "서빙이 완료되었습니다.");
       setToastType("default");
       setServeModalItem(null);
@@ -336,7 +335,7 @@ const ServingPage = () => {
   const handleServeCancel = async () => {
     if (!serveModalItem) return;
     try {
-      const resMsg = await servingCancelApi(serveModalItem.taskId, currentBoothId);
+      const resMsg = await servingCancelApi(serveModalItem.taskId);
       setToastMessage(resMsg || "서빙을 취소했습니다.");
       setToastType("default");
       setServeModalItem(null);
@@ -451,6 +450,7 @@ const ServingPage = () => {
         </S.AcceptModalLayer>
       )}
 
+      {/* 서빙(StaffServe) 전용 모달 */}
       {serveModalItem && (
         <S.AcceptModalLayer>
           <ServingAcceptModal
