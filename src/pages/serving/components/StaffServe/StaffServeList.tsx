@@ -34,12 +34,12 @@
         ))}
         {list.length === 0 && (
             <S.NoDataWrapper>
-            <S.NoDataImage src={IMAGE_CONSTANTS.sadKokkiri} />
-            <S.NoDataText>
-                요청이 없어요...
-                <br />
-                이참에 쉬어볼까요?
-            </S.NoDataText>
+                <S.NoDataImage src={IMAGE_CONSTANTS.sadKokkiri} />
+                <S.NoDataText>
+                    요청이 없어요...
+                    <br />
+                    이참에 쉬어볼까요?
+                </S.NoDataText>
             </S.NoDataWrapper>
         )}
         </S.Wrapper>

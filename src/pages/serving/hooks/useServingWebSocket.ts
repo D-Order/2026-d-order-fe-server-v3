@@ -1,60 +1,93 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ServingTaskResponse } from "../apis/servingApi";
 
-// 명세서에 정의된 웹소켓 페이로드 타입
+// 🌟 백엔드 WebSocketConfig.java 에 설정된 정확한 경로를 확인하고 맞춰주세요.
+// 기존에 /ws/serving 이었다면 그대로 두시면 됩니다.
+export function getServingWebSocketUrl(): string {
+  const base = import.meta.env.VITE_BASE_URL || "";
+  if (!base) {
+    throw new Error("VITE_BASE_URL is not set");
+  }
+  const u = new URL(base);
+  const protocol = u.protocol === "https:" ? "wss:" : "ws:";
+  return `${protocol}//${u.host}/ws/serving`; 
+}
+
 export interface ServingWsPayload {
-    type: "NEW_CALL" | "CATCH_CALL" | "COMPLETE_CALL" | "CANCEL_CALL";
-    data: ServingTaskResponse;
-    }
+  type: "NEW_CALL" | "CATCH_CALL" | "COMPLETE_CALL" | "CANCEL_CALL";
+  data: ServingTaskResponse;
+}
 
 interface UseServingWebSocketProps {
-    enabled?: boolean;
-    onMessage: (type: ServingWsPayload["type"], data: ServingTaskResponse) => void;
+  enabled?: boolean;
+  onMessage: (type: ServingWsPayload["type"], data: ServingTaskResponse) => void;
 }
 
 export const useServingWebSocket = ({
-    enabled = true,
-    onMessage,
-    }: UseServingWebSocketProps) => {
-    useEffect(() => {
-        if (!enabled) return;
+  enabled = true,
+  onMessage,
+}: UseServingWebSocketProps) => {
+  // 콜백 함수를 useRef로 감싸 불필요한 재연결(리렌더링) 방지
+  const onMessageRef = useRef(onMessage);
+  onMessageRef.current = onMessage;
 
-        // 1. 기존 http(s) 기반의 VITE_BASE_URL을 ws(s)로 변환
-        const baseUrl = import.meta.env.VITE_BASE_URL || "http://localhost:8080";
-        const wsUrl = baseUrl.replace(/^http/, "ws").replace(/\/$/, "") + "/ws/serving";
-        
-        // 2. 웹소켓 연결 (쿠키가 있다면 브라우저가 자동으로 포함해서 전송)
-        const socket = new WebSocket(wsUrl);
+  const wsRef = useRef<WebSocket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
-        socket.onopen = () => {
-        console.log("🟢 서빙 웹소켓 연결 성공!");
-        };
+  useEffect(() => {
+    if (!enabled) {
+      wsRef.current?.close();
+      wsRef.current = null;
+      setIsConnected(false);
+      return;
+    }
 
-        socket.onmessage = (event) => {
-        try {
-            const payload: ServingWsPayload = JSON.parse(event.data);
-            console.log(`🔔 서빙 알림 수신 [${payload.type}]:`, payload.data);
-            
-            // type과 data가 정상적으로 들어왔는지 확인 후 콜백 실행
-            if (payload.type && payload.data) {
-            onMessage(payload.type, payload.data);
-            }
-        } catch (error) {
-            console.error("웹소켓 데이터 파싱 에러:", error);
+    let url: string;
+    try {
+      url = getServingWebSocketUrl();
+    } catch (e) {
+      console.error("❌ [ServingWS] URL 생성 에러:", e);
+      return;
+    }
+
+    console.log(`🚀 [ServingWS] 연결 시도: ${url}`);
+    const ws = new WebSocket(url);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log("🟢 [ServingWS] 웹소켓 연결 성공!");
+      setIsConnected(true);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        console.log("📨 [ServingWS] raw message:", event.data);
+        const payload = JSON.parse(event.data) as ServingWsPayload;
+        console.log(`🔔 [ServingWS] parsed [${payload.type}]:`, payload.data);
+
+        if (payload.type && payload.data) {
+          onMessageRef.current(payload.type, payload.data);
         }
-        };
+      } catch (error) {
+        console.error("❌ [ServingWS] 데이터 파싱 에러:", error);
+      }
+    };
 
-        socket.onerror = (error) => {
-        console.error("❌ 서빙 웹소켓 에러:", error);
-        };
+    ws.onerror = (event) => {
+      console.error("❌ [ServingWS] 웹소켓 에러 발생:", event);
+    };
 
-        socket.onclose = () => {
-        console.log("🔴 서빙 웹소켓 연결 끊김");
-        };
+    ws.onclose = (event) => {
+      console.log(`🔴 [ServingWS] 웹소켓 연결 끊김 (code: ${event.code}, reason: ${event.reason || '없음'})`);
+      setIsConnected(false);
+      if (wsRef.current === ws) wsRef.current = null;
+    };
 
-        // 컴포넌트 언마운트 또는 의존성 변경 시 연결 해제
-        return () => {
-        socket.close();
-        };
-    }, [enabled, onMessage]); // 의존성 배열에 onMessage 포함
+    return () => {
+      ws.close();
+      if (wsRef.current === ws) wsRef.current = null;
+    };
+  }, [enabled]);
+
+  return { isConnected };
 };
