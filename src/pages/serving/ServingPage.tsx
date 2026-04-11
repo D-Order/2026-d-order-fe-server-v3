@@ -260,17 +260,7 @@ const ServingPage = () => {
       const modalItem = (latest ?? (item as StaffCallListItem)) as StaffCallListItem;
       setAcceptModalItem(modalItem);
 
-      // PAYMENT_CONFIRM는 슬라이드 완료 후 결제확인 API를 호출해야 하므로 자동 닫기 제외
-      const t = String(modalItem.callType ?? "").trim().toUpperCase();
-      if (t !== "PAYMENT_CONFIRM") {
-        if (acceptModalAutoCloseTimeoutRef.current) {
-          clearTimeout(acceptModalAutoCloseTimeoutRef.current);
-        }
-        acceptModalAutoCloseTimeoutRef.current = setTimeout(() => {
-          acceptModalAutoCloseTimeoutRef.current = null;
-          setAcceptModalItem(null);
-        }, 900);
-      }
+      // 슬라이드 완료 시 처리하므로 자동 닫기 불필요
     }
   };
 
@@ -342,6 +332,28 @@ const ServingPage = () => {
       setServeModalItem(null);
     } catch (err: any) {
       setToastMessage(err?.response?.data?.message || "서빙 취소 처리에 실패했습니다.");
+      setToastType("error");
+    }
+  };
+
+  const handleStaffCallCompleted = async () => {
+    if (!acceptModalItem) return;
+    try {
+      await staffCallCompleteApi({
+        tableId: acceptModalItem.tableId,
+        cartId: acceptModalItem.cartId,
+        callType: acceptModalItem.callType,
+      });
+      setToastMessage("직원호출이 완료되었습니다.");
+      setToastType("default");
+      setAcceptModalItem(null);
+      requestStaffCallList();
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "직원호출 완료 처리에 실패했습니다.";
+      setToastMessage(msg);
       setToastType("error");
     }
   };
@@ -445,7 +457,7 @@ const ServingPage = () => {
               String(acceptModalItem.callType ?? "").trim().toUpperCase() ===
               "PAYMENT_CONFIRM"
                 ? () => void handlePaymentConfirmOrdered()
-                : undefined
+                : () => void handleStaffCallCompleted()
             }
           />
         </S.AcceptModalLayer>
