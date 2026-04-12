@@ -65,8 +65,12 @@ instance.interceptors.response.use(
 
       try {
         // instance 대신 순수 axios로 호출 (인터셉터 재진입 방지)
+        const baseUrl = (import.meta.env.VITE_BASE_URL ?? "").replace(
+          /\/+$/,
+          ""
+        );
         await axios.post(
-          `${import.meta.env.VITE_BASE_URL}/api/v3/spring/auth/refresh`,
+          `${baseUrl}/api/v3/spring/auth/refresh`,
           {},
           { withCredentials: true }
         );
