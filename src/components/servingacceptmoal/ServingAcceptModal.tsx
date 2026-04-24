@@ -139,6 +139,7 @@ const ServingAcceptModal = ({
 
   return (
     <S.Wrapper>
+      <S.BackGround />
       <S.TopSection>
         <S.TopSectionCloseBtn
           src={IMAGE_CONSTANTS.ServingAcceptModal.CloseBtn}
@@ -166,7 +167,7 @@ const ServingAcceptModal = ({
           src={IMAGE_CONSTANTS.ServingAcceptModal.RejectBtn}
         />
         <S.InformationSectionContent>
-          {tableNumberText} 
+          {tableNumberText}
           {extraContentText && (
             <>
               <S.InformationSectionDiveider />
