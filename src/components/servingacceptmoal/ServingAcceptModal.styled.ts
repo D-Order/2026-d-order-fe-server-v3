@@ -12,11 +12,20 @@ export const Wrapper = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  z-index: 1;
+`;
+
+export const BackGround = styled.div`
   background-color: ${({ theme }) => theme.colors.Black};
   opacity: 0.9;
 
   backdrop-filter: blur(10px);
-  z-index: 1;
+  z-index: -1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 `;
 
 export const TopSection = styled.div`
@@ -202,7 +211,7 @@ export const SlideCompletedWrap = styled.div<{ $visible: boolean }>`
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   pointer-events: ${({ $visible }) => ($visible ? "auto" : "none")};
   transition: opacity 0.25s ease;
-  z-index: 1;
+  z-index: 2;
 `;
 
 export const SlideCompletedCheck = styled.img`
