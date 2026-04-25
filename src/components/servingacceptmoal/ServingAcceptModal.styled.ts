@@ -112,10 +112,9 @@ export const BottomAnimationSection = styled.div`
 `;
 
 export const SlideTrack = styled.div<{
-  $progress: number;
   $isCompleted: boolean;
 }>`
-  --slide-progress: ${({ $progress }) => $progress};
+  --slide-progress: 0;
   position: relative;
   width: 100%;
   height: 4rem;
@@ -155,11 +154,10 @@ export const SlideTrackLabel = styled.span`
 `;
 
 export const SlideThumb = styled.div<{
-  $progress: number;
   $isDragging?: boolean;
 }>`
   position: absolute;
-  left: calc(0.25rem + ${({ $progress }) => $progress} * (100% - 4rem));
+  left: calc(0.25rem + var(--slide-progress, 0) * (100% - 4rem));
   top: 50%;
   transform: translateY(-50%);
   width: 3.5rem;
