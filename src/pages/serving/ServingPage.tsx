@@ -181,6 +181,21 @@ const ServingPage = () => {
     tableNumber: string;
   } | null>(null);
 
+  // 모달/시트가 열려있을 때 배경 스크롤 방지
+  useEffect(() => {
+    const isOverlayOpen =
+      isTableResetOpen || Boolean(acceptModalItem) || Boolean(serveModalItem);
+    if (!isOverlayOpen) return;
+
+    const { body } = document;
+    const prevOverflow = body.style.overflow;
+    body.style.overflow = "hidden";
+
+    return () => {
+      body.style.overflow = prevOverflow;
+    };
+  }, [isTableResetOpen, acceptModalItem, serveModalItem]);
+
   const staffCallWsEnabled = Boolean(user?.booth_id);
 
   const {
