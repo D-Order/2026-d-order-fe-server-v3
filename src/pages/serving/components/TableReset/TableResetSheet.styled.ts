@@ -96,13 +96,18 @@ export const KeyButton = styled.button`
   }
 `;
 
-export const SubmitButton = styled.button`
+export const SubmitButton = styled.button<{ $active: boolean }>`
   width: 100%;
   height: 3.5rem;
   border-radius: 0.75rem;
-  background-color: ${({ theme }) => theme.colors?.Black || "#333333"};
+  background-color: ${({ theme, $active }) =>
+    $active ? theme.colors.Orange01 : theme.colors.Black02};
   color: ${({ theme }) => theme.colors?.White || "#FFFFFF"};
   font: ${({ theme }) => theme.fonts?.Bold16 || "700 16px sans-serif"};
   border: none;
   cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
 `;

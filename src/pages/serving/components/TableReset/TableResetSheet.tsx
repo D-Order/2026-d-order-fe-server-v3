@@ -9,6 +9,7 @@ interface TableResetSheetProps {
 
 const TableResetSheet = ({ onClose, onSubmit }: TableResetSheetProps) => {
   const [tableNumber, setTableNumber] = useState("");
+  const hasInput = tableNumber.trim().length > 0;
 
   const handleKeyPress = (val: string) => {
     if (tableNumber.length < 3) setTableNumber((prev) => prev + val);
@@ -19,7 +20,7 @@ const TableResetSheet = ({ onClose, onSubmit }: TableResetSheetProps) => {
   };
 
   const handleSubmit = async () => {
-    if (tableNumber) {
+    if (hasInput) {
       await onSubmit(tableNumber);
       onClose();
     }
@@ -60,7 +61,14 @@ const TableResetSheet = ({ onClose, onSubmit }: TableResetSheetProps) => {
             />
           </S.KeyButton>
         </S.KeypadGrid>
-        <S.SubmitButton onClick={handleSubmit}>선택완료</S.SubmitButton>
+        <S.SubmitButton
+          type="button"
+          $active={hasInput}
+          disabled={!hasInput}
+          onClick={handleSubmit}
+        >
+          선택완료
+        </S.SubmitButton>
       </S.SheetContainer>
     </S.Overlay>
   );
