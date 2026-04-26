@@ -12,11 +12,20 @@ export const Wrapper = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  z-index: 1;
+`;
+
+export const BackGround = styled.div`
   background-color: ${({ theme }) => theme.colors.Black};
   opacity: 0.9;
 
   backdrop-filter: blur(10px);
-  z-index: 1;
+  z-index: -1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 `;
 
 export const TopSection = styled.div`
@@ -103,10 +112,9 @@ export const BottomAnimationSection = styled.div`
 `;
 
 export const SlideTrack = styled.div<{
-  $progress: number;
   $isCompleted: boolean;
 }>`
-  --slide-progress: ${({ $progress }) => $progress};
+  --slide-progress: 0;
   position: relative;
   width: 100%;
   height: 4rem;
@@ -146,11 +154,10 @@ export const SlideTrackLabel = styled.span`
 `;
 
 export const SlideThumb = styled.div<{
-  $progress: number;
   $isDragging?: boolean;
 }>`
   position: absolute;
-  left: calc(0.25rem + ${({ $progress }) => $progress} * (100% - 4rem));
+  left: calc(0.25rem + var(--slide-progress, 0) * (100% - 4rem));
   top: 50%;
   transform: translateY(-50%);
   width: 3.5rem;
@@ -202,7 +209,7 @@ export const SlideCompletedWrap = styled.div<{ $visible: boolean }>`
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   pointer-events: ${({ $visible }) => ($visible ? "auto" : "none")};
   transition: opacity 0.25s ease;
-  z-index: 1;
+  z-index: 2;
 `;
 
 export const SlideCompletedCheck = styled.img`

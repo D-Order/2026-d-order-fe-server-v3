@@ -13,6 +13,7 @@ const MenuFilterSheet = ({ onClose, initialSelectedMenus, onApply }: MenuFilterS
     const [selectedMenus, setSelectedMenus] = useState<(number | string)[]>(initialSelectedMenus);
     const [menuList, setMenuList] = useState<MenuItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const hasSelection = selectedMenus.length > 0;
 
     // API 호출하여 메뉴 목록 가져오기
     useEffect(() => {
@@ -37,6 +38,7 @@ const MenuFilterSheet = ({ onClose, initialSelectedMenus, onApply }: MenuFilterS
     };
 
     const handleComplete = () => {
+        if (!hasSelection) return;
         onApply(selectedMenus);
         onClose();
     };
@@ -82,7 +84,14 @@ const MenuFilterSheet = ({ onClose, initialSelectedMenus, onApply }: MenuFilterS
                     )}
                 </S.GridContainer>
 
-                <S.SubmitButton onClick={handleComplete}>선택완료</S.SubmitButton>
+                <S.SubmitButton
+                    type="button"
+                    $active={hasSelection}
+                    disabled={!hasSelection}
+                    onClick={handleComplete}
+                >
+                    선택완료
+                </S.SubmitButton>
             </S.SheetContainer>
         </S.Overlay>
     );
