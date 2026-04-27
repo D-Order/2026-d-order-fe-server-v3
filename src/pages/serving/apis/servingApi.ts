@@ -4,6 +4,7 @@ import { instance } from "@services/instance";
 export interface ServingTaskResponse {
     taskId: number;
     orderItemId: number;
+    tableNumber: number;
     status: string;
     requestedAt: string;
 }
