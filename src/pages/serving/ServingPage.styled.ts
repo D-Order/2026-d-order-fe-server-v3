@@ -8,7 +8,9 @@ export const Wrapper = styled.div`
 `;
 
 export const AcceptModalLayer = styled.div`
-  position: fixed;
+  position: absolute;
+  transform: translate(0, -52px);
+
   inset: 0;
   z-index: 100;
 `;
