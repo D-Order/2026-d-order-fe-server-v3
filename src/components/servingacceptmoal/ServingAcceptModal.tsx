@@ -15,23 +15,37 @@ const CLICK_COMPLETE_TRANSITION_MS = 220;
 type HeaderProps = {
   onLeft: () => void;
   onCancelOrder?: () => void;
+  showCancelOrder?: boolean;
 };
 
-const ModalHeader = memo(({ onLeft, onCancelOrder }: HeaderProps) => {
-  return (
-    <S.TopSection>
-      <S.TopSectionCloseBtn
-        src={IMAGE_CONSTANTS.ServingAcceptModal.CloseBtn}
-        alt="수락 취소 / 뒤로가기"
-        onClick={onLeft}
-        role="button"
-      />
-      <S.TopSectionRejectBtn type="button" onClick={() => onCancelOrder?.()}>
-        주문 취소
-      </S.TopSectionRejectBtn>
-    </S.TopSection>
-  );
-});
+const ModalHeader = memo(
+  ({ onLeft, onCancelOrder, showCancelOrder = true }: HeaderProps) => {
+    return (
+      <S.TopSection>
+        <S.TopSectionCloseBtn
+          src={IMAGE_CONSTANTS.ServingAcceptModal.CloseBtn}
+          alt="수락 취소 / 뒤로가기"
+          onClick={onLeft}
+          role="button"
+        />
+        {showCancelOrder && (
+          <S.TopSectionRejectBtn
+            type="button"
+            onClick={() => {
+              console.log("[ServingAcceptModal] 주문 취소 클릭", {
+                hasOnCancelOrder: typeof onCancelOrder === "function",
+                showCancelOrder,
+              });
+              onCancelOrder?.();
+            }}
+          >
+            주문 취소
+          </S.TopSectionRejectBtn>
+        )}
+      </S.TopSection>
+    );
+  }
+);
 ModalHeader.displayName = "ModalHeader";
 
 type InfoProps = {
@@ -189,12 +203,17 @@ type ClickControlProps = {
 };
 
 const ClickControl = memo(
-  ({ clickLabel, completedText, clickCompletedText, onComplete }: ClickControlProps) => {
+  ({
+    clickLabel,
+    completedText,
+    clickCompletedText,
+    onComplete,
+  }: ClickControlProps) => {
     const [isCompleted, setIsCompleted] = useState(false);
     const [isClickExiting, setIsClickExiting] = useState(false);
-    const clickCompleteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-      null
-    );
+    const clickCompleteTimeoutRef = useRef<ReturnType<
+      typeof setTimeout
+    > | null>(null);
 
     const handleClickComplete = useCallback(() => {
       if (isCompleted || isClickExiting) return;
@@ -277,6 +296,21 @@ const ServingAcceptModal = ({
   tableNumberText = "테이블",
   extraContentText,
 }: ServingAcceptModalProps) => {
+  const isStaffCall = useMemo(() => {
+    const t = String(callType ?? "")
+      .trim()
+      .toUpperCase();
+    return t === "STAFF_CALL";
+  }, [callType]);
+
+  useEffect(() => {
+    console.log("[ServingAcceptModal] render", {
+      callType: callType ?? null,
+      isStaffCall,
+      showCancelOrder: !isStaffCall,
+    });
+  }, [callType, isStaffCall]);
+
   const effectiveVariant = callType?.trim()
     ? servingAcceptVariantForCallType(callType)
     : variant;
@@ -295,7 +329,11 @@ const ServingAcceptModal = ({
   return (
     <S.Wrapper>
       <S.BackGround />
-      <ModalHeader onLeft={handleLeft} onCancelOrder={onCancelOrder} />
+      <ModalHeader
+        onLeft={handleLeft}
+        onCancelOrder={onCancelOrder}
+        showCancelOrder={!isStaffCall}
+      />
       <ModalInfo
         titleLines={titleLines}
         tableNumberText={tableNumberText}

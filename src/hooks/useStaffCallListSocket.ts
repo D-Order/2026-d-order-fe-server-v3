@@ -44,19 +44,22 @@ export function useStaffCallListSocket(options: UseStaffCallListSocketOptions) {
     ws.send(JSON.stringify(LIST_PAYLOAD));
   }, []);
 
-  const requestList = useCallback((opts?: { silent?: boolean }) => {
-    const ws = wsRef.current;
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
-      if (!opts?.silent) {
-        onErrorRef.current?.(
-          "연결이 준비되지 않았습니다. 잠시 후 다시 시도해 주세요."
-        );
+  const requestList = useCallback(
+    (opts?: { silent?: boolean }) => {
+      const ws = wsRef.current;
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        if (!opts?.silent) {
+          onErrorRef.current?.(
+            "연결이 준비되지 않았습니다. 잠시 후 다시 시도해 주세요."
+          );
+        }
+        return;
       }
-      return;
-    }
-    setIsRefreshing(true);
-    sendList();
-  }, [sendList]);
+      setIsRefreshing(true);
+      sendList();
+    },
+    [sendList]
+  );
 
   useEffect(() => {
     if (!options.enabled) {
@@ -92,18 +95,35 @@ export function useStaffCallListSocket(options: UseStaffCallListSocketOptions) {
           type?: string;
           data?: unknown;
           total?: number;
+          staff_call_id?: unknown;
+          status?: unknown;
         };
         console.log("[StaffCallWS] parsed:", msg);
-        if (
-          msg.type === "LIST_RESULT" ||
-          msg.type === "STAFF_CALL_SNAPSHOT"
-        ) {
+
+        if (msg.type === "LIST_RESULT" || msg.type === "STAFF_CALL_SNAPSHOT") {
           const data = Array.isArray(msg.data) ? msg.data : [];
           onListUpdateRef.current({
             items: data,
             total: typeof msg.total === "number" ? msg.total : undefined,
           });
           setIsRefreshing(false);
+          return;
+        }
+
+        // 단건 상태 이벤트(구독 기반): DELETED 등
+        if (msg.type === "STAFF_CALL_STATUS") {
+          const status = String((msg as any)?.status ?? "")
+            .trim()
+            .toUpperCase();
+          const staffCallId = Number((msg as any)?.staff_call_id);
+          console.log("[StaffCallWS] status event:", { staffCallId, status });
+
+          // DELETED는 LIST_RESULT로 반영되도록 즉시 목록 갱신
+          if (status === "DELETED") {
+            setIsRefreshing(true);
+            sendList();
+          }
+          return;
         }
       } catch {
         onErrorRef.current?.("목록 메시지를 처리하지 못했습니다.");
