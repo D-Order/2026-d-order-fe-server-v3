@@ -1,5 +1,5 @@
 // components/StaffServe/StaffServeList.tsx
-import * as S from "./StaffServe.styled"; // 기존 스타일 재사용
+import * as S from "./StaffServe.styled";
 import { IMAGE_CONSTANTS } from "@constants/ImageConstants";
 import StaffServeItem from "./StaffServeItem";
 
@@ -7,14 +7,14 @@ interface StaffServeUIItem {
   id: number;
   orderItemId: number;
   tableNumber: string;
-  request: string;
-  waitingTime: number;
+  menuName: string;
+  quantity: number;
+  requestedAt?: string;
   active: boolean;
 }
 
 interface StaffServeListProps {
   list: StaffServeUIItem[];
-  // 🌟 StaffServe에서 내려받을 이벤트 함수 추가
   onAcceptServe?: (taskId: number, tableNumber: string, orderItemId: number) => void;
 }
 
@@ -28,10 +28,10 @@ const StaffServeList = ({ list, onAcceptServe }: StaffServeListProps) => {
           id={item.id}
           orderItemId={item.orderItemId}
           tableNumber={item.tableNumber}
-          request={item.request}
-          waitingTime={item.waitingTime}
+          menuName={item.menuName}
+          quantity={item.quantity}
+          requestedAt={item.requestedAt}
           active={item.active}
-          // 🌟 Item 컴포넌트로 전달
           onAccept={onAcceptServe}
         />
       ))}
