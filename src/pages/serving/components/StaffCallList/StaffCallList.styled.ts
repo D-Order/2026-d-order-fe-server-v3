@@ -1,15 +1,18 @@
 import styled from "styled-components";
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div<{ $empty?: boolean }>`
   position: relative;
   width: 100%;
-  height: fit-content;
+  flex: 1;
+  min-height: 0;
   background-color: ${({ theme }) => theme.colors.Bg};
   box-sizing: border-box;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  overflow-y: ${({ $empty }) => ($empty ? "hidden" : "auto")};
+  justify-content: ${({ $empty }) => ($empty ? "center" : "flex-start")};
 `;
 
 export const TopRow = styled.div`
@@ -42,14 +45,12 @@ export const RefreshButton = styled.button`
 `;
 
 export const NoDataWrapper = styled.div`
-  width: 100%;
-  height: 100%;
   display: flex;
   gap: 2rem;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
+  flex-shrink: 0;
 `;
 
 export const NoDataImage = styled.img`
@@ -59,9 +60,10 @@ export const NoDataImage = styled.img`
 `;
 
 export const NoDataText = styled.p`
-  ${({ theme }) => theme.fonts.ExtraBold24};
-  color: ${({ theme }) => theme.colors.Focused};
+  ${({ theme }) => theme.fonts.Bold18};
+  color: ${({ theme }) => theme.colors.Black02};
   text-align: center;
-  line-height: 2;
+  line-height: 1.3;
   white-space: pre-line;
+  opacity: 0.6;
 `;

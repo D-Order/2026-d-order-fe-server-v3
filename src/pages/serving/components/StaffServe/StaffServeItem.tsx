@@ -4,16 +4,18 @@ import { IMAGE_CONSTANTS } from "@constants/ImageConstants";
 
 interface StaffServeItemProps {
   id: number;
+  orderItemId: number;
   tableNumber: string;
   request: string;
   waitingTime: number;
   active: boolean;
   // 🌟 상위에서 내려받을 수락 함수 추가
-  onAccept?: (taskId: number, tableNumber: string) => void;
+  onAccept?: (taskId: number, tableNumber: string, orderItemId: number) => void;
 }
 
 const StaffServeItem = ({
   id,
+  orderItemId,
   tableNumber,
   request,
   waitingTime,
@@ -40,10 +42,9 @@ const StaffServeItem = ({
       </S.LeftSection>
       <S.StaffCallButton
         $active={active}
-        // 🌟 active(수락 가능 상태)일 때만 클릭 이벤트 동작
         onClick={() => {
           if (active && onAccept) {
-            onAccept(id, tableNumber);
+            onAccept(id, tableNumber, orderItemId);
           }
         }}
       >
