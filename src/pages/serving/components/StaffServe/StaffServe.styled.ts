@@ -76,7 +76,7 @@ export const TableWaiting = styled.div<{ $active: boolean }>`
   gap: 0.25rem;
 
   ${({ theme }) => theme.fonts.Bold12};
-  color: ${({ $active, theme }) => 
+  color: ${({ $active, theme }) =>
     $active ? theme.colors.Orange01 : theme.colors.Focused};
 `;
 
@@ -111,30 +111,38 @@ export const StaffCallButton = styled.button<{ $active: boolean }>`
 // 기존 스타일 유지 (리스트 컨테이너 및 NoData 등)
 // ==========================================
 
-// 기존 Wrapper는 개별 Item의 Wrapper와 이름이 충돌하므로 ListWrapper로 변경했습니다.
-// (부모 컴포넌트에서 리스트를 감쌀 때 사용하시면 됩니다)
-export const ListWrapper = styled.div`
-  position: relative;
+/** StaffServe: 필터 아래 남는 영역을 채우고, 빈 화면은 수직·수평 중앙 */
+export const ServeColumn = styled.div`
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  height: calc(100dvh - 12rem);
-  background-color: ${({ theme }) => theme.colors.Bg};
   box-sizing: border-box;
-  padding: 1rem;
+`;
+
+export const ListContainer = styled.div<{ $empty?: boolean }>`
+  flex: 1;
+  min-height: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  padding: 1rem;
+  box-sizing: border-box;
+  background-color: ${({ theme }) => theme.colors.Bg};
+  overflow-y: ${({ $empty }) => ($empty ? "hidden" : "auto")};
+  justify-content: ${({ $empty }) => ($empty ? "center" : "flex-start")};
 `;
 
 export const NoDataWrapper = styled.div`
-  width: 100%;
-  height: 100%;
-  min-height: 50vh;
   display: flex;
   gap: 2rem;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  flex-shrink: 0;
 `;
 
 export const NoDataImage = styled.img`
@@ -144,9 +152,10 @@ export const NoDataImage = styled.img`
 `;
 
 export const NoDataText = styled.p`
-  ${({ theme }) => theme.fonts.ExtraBold24};
-  color: ${({ theme }) => theme.colors.Focused};
+  ${({ theme }) => theme.fonts.Bold18};
+  color: ${({ theme }) => theme.colors.Black02};
   text-align: center;
-  line-height: 2;
+  line-height: 1.3;
   white-space: pre-line;
+  opacity: 0.6;
 `;

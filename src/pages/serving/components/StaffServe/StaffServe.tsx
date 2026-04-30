@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import * as S from "./StaffServe.styled";
 import components from "../index";
 import StaffServeList from "./StaffServeList";
 import { getMenuList, MenuItem } from "../../apis/getMenuList";
@@ -20,7 +21,8 @@ export interface StaffServeUIItem {
 
 interface StaffServeProps {
     onUpdateServeCount?: (count: number) => void;
-    onAcceptServe?: (taskId: number, tableNumber: string) => void;
+    // 상위(ServingPage)로 수락 이벤트를 올리기 위한 함수
+    onAcceptServe?: (taskId: number, tableNumber: string, orderItemId: number) => void;
 }
 
 const StaffServe = ({ onUpdateServeCount, onAcceptServe }: StaffServeProps) => {
@@ -158,7 +160,7 @@ const StaffServe = ({ onUpdateServeCount, onAcceptServe }: StaffServeProps) => {
         : undefined;
 
     return (
-        <>
+        <S.ServeColumn>
         <components.FilterBtn
             onMenuClick={() => setIsMenuFilterOpen(true)}
             onTableClick={() => setIsTableFilterOpen(true)}
@@ -191,7 +193,7 @@ const StaffServe = ({ onUpdateServeCount, onAcceptServe }: StaffServeProps) => {
             onClose={() => setIsTableFilterOpen(false)}
             />
         )}
-        </>
+        </S.ServeColumn>
     );
 };
 

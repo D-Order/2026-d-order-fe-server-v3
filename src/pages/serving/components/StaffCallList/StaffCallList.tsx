@@ -30,7 +30,7 @@ interface StaffCallListProps {
 
 const StaffCallList = (StaffCallListProps: StaffCallListProps) => {
   return (
-    <S.Wrapper>
+    <S.Wrapper $empty={StaffCallListProps.StaffCallList.length === 0}>
       {StaffCallListProps.StaffCallList.map((item) => (
         <components.StaffCall
           key={item.id}

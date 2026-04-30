@@ -13,8 +13,15 @@ interface StaffCallProps {
   onAccept?: () => void;
 }
 const StaffCall = (staffCallProps: StaffCallProps) => {
-  const { tableNumber, request, waitingTime, active, createdAt, nowTick, onAccept } =
-    staffCallProps;
+  const {
+    tableNumber,
+    request,
+    waitingTime,
+    active,
+    createdAt,
+    nowTick,
+    onAccept,
+  } = staffCallProps;
 
   const minutesAgo = (() => {
     if (!createdAt) return null;
@@ -36,7 +43,9 @@ const StaffCall = (staffCallProps: StaffCallProps) => {
       <S.LeftSection>
         <S.Table>
           <S.TableNumber $active={active}>{tableNumber}</S.TableNumber>
-          <S.TableCall $active={active}>{request}</S.TableCall>
+          <S.TableCall $active={active}>
+            {request == "STAFF_CALL" ? "직원 호출" : "결제확인요청"}
+          </S.TableCall>
         </S.Table>
         <S.TableWaiting $active={active} $recent={isRecent}>
           <S.TableWaitingLogo
