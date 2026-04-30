@@ -592,12 +592,17 @@ const ServingPage = () => {
             });
 
             if (!result.success) {
-              setToastMessage(result.errorMsg || "에러가 발생했습니다.");
+              setToastMessage(
+                result.errorMsg ||
+                  "유효하지 않은 테이블입니다. 테이블 번호를 다시 확인해주세요."
+              );
               setToastType("error");
-            } else {
-              setToastMessage(result.payload?.message || "초기화 성공");
-              setToastType("default");
+              return false;
             }
+
+            setToastMessage(result.payload?.message || "테이블이 초기화되었습니다.");
+            setToastType("default");
+            return true;
           }}
         />
       )}

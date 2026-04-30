@@ -4,7 +4,7 @@ import * as S from "./TableResetSheet.styled";
 import { IMAGE_CONSTANTS } from "@constants/ImageConstants";
 interface TableResetSheetProps {
   onClose: () => void;
-  onSubmit: (tableNumber: string) => Promise<void>;
+  onSubmit: (tableNumber: string) => Promise<boolean>;
   validTables: number[];
   onInvalidSubmit?: (message: string) => void;
 }
@@ -32,8 +32,10 @@ const TableResetSheet = ({ onClose, onSubmit, validTables, onInvalidSubmit }: Ta
       return;
     }
 
-    await onSubmit(tableNumber);
-    onClose();
+    const success = await onSubmit(tableNumber);
+    if (success) {
+      onClose();
+    }
   };
 
   return (
