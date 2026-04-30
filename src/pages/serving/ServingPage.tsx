@@ -17,20 +17,22 @@ import { useStaffCallListSocket } from "@hooks/useStaffCallListSocket";
 
 import StaffServe from "./components/StaffServe/StaffServe";
 
-// 🌟 경로 수정 완료
 import {
   servingCatchApi,
   servingCompleteApi,
   servingCancelApi,
+  serverOrderCancelApi,
 } from "./apis/servingApi";
 
 const ServingPage = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<"default" | "error">("default");
-  
+
   const { resetTable } = useTableReset();
   const { user } = useUser();
-  const [activeTab, setActiveTab] = useState<"StaffCall" | "StaffServe">("StaffServe");
+  const [activeTab, setActiveTab] = useState<"StaffCall" | "StaffServe">(
+    "StaffServe"
+  );
   const [isVisible, setIsVisible] = useState(true);
   const [isTableResetOpen, setIsTableResetOpen] = useState(false);
 
@@ -178,6 +180,7 @@ const ServingPage = () => {
 
   const [serveModalItem, setServeModalItem] = useState<{
     taskId: number;
+    orderItemId: number;
     tableNumber: string;
   } | null>(null);
 
@@ -228,11 +231,15 @@ const ServingPage = () => {
     callType: string;
   }): Promise<boolean> => {
     if (
-      !Number.isFinite(payload.tableId) || payload.tableId <= 0 ||
-      !Number.isFinite(payload.cartId) || payload.cartId <= 0 ||
+      !Number.isFinite(payload.tableId) ||
+      payload.tableId <= 0 ||
+      !Number.isFinite(payload.cartId) ||
+      payload.cartId <= 0 ||
       payload.callType.trim() === ""
     ) {
-      setToastMessage("수락에 필요한 정보가 부족합니다. 목록을 새로고침 해주세요.");
+      setToastMessage(
+        "수락에 필요한 정보가 부족합니다. 목록을 새로고침 해주세요."
+      );
       setToastType("error");
       return false;
     }
@@ -246,7 +253,9 @@ const ServingPage = () => {
     } catch (err: any) {
       const status = err?.response?.status;
       const msg =
-        err?.response?.data?.message || err?.message || "호출 수락에 실패했습니다.";
+        err?.response?.data?.message ||
+        err?.message ||
+        "호출 수락에 실패했습니다.";
       setToastMessage(msg);
       setToastType("error");
       if (status === 409) {
@@ -273,7 +282,8 @@ const ServingPage = () => {
         typeof item.id === "number"
           ? StaffCallList.find((x) => x.id === item.id)
           : undefined;
-      const modalItem = (latest ?? (item as StaffCallListItem)) as StaffCallListItem;
+      const modalItem = (latest ??
+        (item as StaffCallListItem)) as StaffCallListItem;
       setAcceptModalItem(modalItem);
 
       // 슬라이드 완료 시 처리하므로 자동 닫기 불필요
@@ -297,7 +307,9 @@ const ServingPage = () => {
     } catch (err: any) {
       const status = err?.response?.status;
       const msg =
-        err?.response?.data?.message || err?.message || "호출 수락 취소에 실패했습니다.";
+        err?.response?.data?.message ||
+        err?.message ||
+        "호출 수락 취소에 실패했습니다.";
       setToastMessage(msg);
       setToastType("error");
       if (status === 409) {
@@ -306,19 +318,71 @@ const ServingPage = () => {
     }
   };
 
+  /**
+   * acceptModal(결제확인/기타 staffcall) 우측 상단 "주문 취소"
+   * 1) 수락 취소(ACCEPTED → PENDING) → 2) 주문 취소 단일 API(/server/order/cancel)
+   *
+   * 서버는 booth_id + staffCallId로 검증/취소 처리 후 WS DELETED를 브로드캐스트합니다.
+   */
+  const handleAcceptModalCancelOrder = async () => {
+    if (!acceptModalItem) return;
+    const staffCallId = Number(acceptModalItem.id);
+    const { tableId, cartId, callType } = acceptModalItem;
+
+    if (!Number.isFinite(staffCallId) || staffCallId <= 0) {
+      setToastMessage("staffCallId가 없어 주문 취소를 진행할 수 없습니다.");
+      setToastType("error");
+      return;
+    }
+    if (!tableId || !cartId || !callType) {
+      setToastMessage("취소에 필요한 정보가 부족합니다.");
+      setToastType("error");
+      return;
+    }
+
+    try {
+      console.log("[ServingPage] 주문 취소(acceptModal) 시작", {
+        staffCallId,
+        tableId,
+        cartId,
+        callType,
+      });
+      await staffCallCancelApi({ tableId, cartId, callType });
+      await serverOrderCancelApi({ staffCallId });
+      setToastMessage("주문이 취소되었습니다.");
+      setToastType("default");
+      setAcceptModalItem(null);
+      requestStaffCallList();
+    } catch (err: any) {
+      console.log("[ServingPage] 주문 취소(acceptModal) 실패", err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "주문 취소 처리에 실패했습니다.";
+      setToastMessage(msg);
+      setToastType("error");
+    }
+  };
+
   /* ================= 서빙 요청 (StaffServe) 로직 ================= */
 
-  const handleServeCatch = async (taskId: number, tableNumber: string) => {
+  const handleServeCatch = async (
+    taskId: number,
+    tableNumber: string,
+    orderItemId: number
+  ) => {
     try {
       const resMsg = await servingCatchApi(taskId);
       setToastMessage(resMsg || "서빙을 시작합니다.");
       setToastType("default");
-      setServeModalItem({ taskId, tableNumber });
+      setServeModalItem({ taskId, orderItemId, tableNumber });
     } catch (err: any) {
       if (err?.response?.status === 409) {
         alert("앗! 다른 직원이 먼저 수락한 콜입니다.");
       } else {
-        setToastMessage(err?.response?.data?.message || "서빙 수락에 실패했습니다.");
+        setToastMessage(
+          err?.response?.data?.message || "서빙 수락에 실패했습니다."
+        );
         setToastType("error");
       }
     }
@@ -327,12 +391,14 @@ const ServingPage = () => {
   const handleServeComplete = async () => {
     if (!serveModalItem) return;
     try {
-      const resMsg = await servingCompleteApi(serveModalItem.taskId);      
+      const resMsg = await servingCompleteApi(serveModalItem.taskId);
       setToastMessage(resMsg || "서빙이 완료되었습니다.");
       setToastType("default");
       setServeModalItem(null);
     } catch (err: any) {
-      setToastMessage(err?.response?.data?.message || "서빙 완료 처리에 실패했습니다.");
+      setToastMessage(
+        err?.response?.data?.message || "서빙 완료 처리에 실패했습니다."
+      );
       setToastType("error");
     }
   };
@@ -345,7 +411,40 @@ const ServingPage = () => {
       setToastType("default");
       setServeModalItem(null);
     } catch (err: any) {
-      setToastMessage(err?.response?.data?.message || "서빙 취소 처리에 실패했습니다.");
+      setToastMessage(
+        err?.response?.data?.message || "서빙 취소 처리에 실패했습니다."
+      );
+      setToastType("error");
+    }
+  };
+
+  /**
+   * 모달 우측 상단 "주문 취소"
+   * 1) 서빙 수락 취소(spring) → 2) 주문 취소 단일 API(spring)
+   */
+  const handleServeCancelAndOrderCancel = async () => {
+    if (!serveModalItem) return;
+    const { taskId, orderItemId } = serveModalItem;
+    console.log("[ServingPage] 주문 취소 시작", { taskId, orderItemId });
+    if (!Number.isFinite(taskId) || taskId <= 0) {
+      setToastMessage("taskId가 없어 주문 취소를 진행할 수 없습니다.");
+      setToastType("error");
+      return;
+    }
+
+    try {
+      await servingCancelApi(taskId);
+      await serverOrderCancelApi({ staffCallId: taskId });
+      setToastMessage("주문이 취소되었습니다.");
+      setToastType("default");
+      setServeModalItem(null);
+    } catch (err: any) {
+      console.log("[ServingPage] 주문 취소 실패", err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "주문 취소 처리에 실패했습니다.";
+      setToastMessage(msg);
       setToastType("error");
     }
   };
@@ -374,7 +473,9 @@ const ServingPage = () => {
 
   const handlePaymentConfirmOrdered = async () => {
     if (!acceptModalItem) return;
-    const callType = String(acceptModalItem.callType ?? "").trim().toUpperCase();
+    const callType = String(acceptModalItem.callType ?? "")
+      .trim()
+      .toUpperCase();
     if (callType !== "PAYMENT_CONFIRM") return;
 
     try {
@@ -399,29 +500,33 @@ const ServingPage = () => {
 
   return (
     <S.Wrapper>
-      <components.SelectTap 
-        activeTab={activeTab} 
-        onTabChange={handleTabChange} 
+      <components.SelectTap
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
         staffServeCount={serveCount}
         staffCallCount={staffCallTotal}
       />
 
-      {activeTab === "StaffServe" && (
-        <StaffServe 
-          onUpdateServeCount={setServeCount}
-          onAcceptServe={(taskId, tableNumber) => handleServeCatch(taskId, tableNumber)}
-        />
-      )}
+      <S.MainContent>
+        {activeTab === "StaffServe" && (
+          <StaffServe
+            onUpdateServeCount={setServeCount}
+            onAcceptServe={(taskId, tableNumber, orderItemId) =>
+              handleServeCatch(taskId, tableNumber, orderItemId)
+            }
+          />
+        )}
 
-      {activeTab === "StaffCall" && (
-        <components.StaffCallList
-          StaffCallList={StaffCallList}
-          nowTick={nowTick}
-          onRefresh={requestStaffCallList}
-          refreshing={isStaffCallRefreshing}
-          onRequestAccept={(item) => void handleRequestAccept(item)}
-        />
-      )}
+        {activeTab === "StaffCall" && (
+          <components.StaffCallList
+            StaffCallList={StaffCallList}
+            nowTick={nowTick}
+            onRefresh={requestStaffCallList}
+            refreshing={isStaffCallRefreshing}
+            onRequestAccept={(item) => void handleRequestAccept(item)}
+          />
+        )}
+      </S.MainContent>
 
       <components.ResetBtn
         isVisible={isVisible}
@@ -461,15 +566,22 @@ const ServingPage = () => {
           <ServingAcceptModal
             callType={acceptModalItem.callType}
             tableNumberText={acceptModalItem.tableNumber}
-            extraContentText={
-              acceptModalItem.cartPrice !== undefined
+            extraContentText={(() => {
+              const t = String(acceptModalItem.callType ?? "")
+                .trim()
+                .toUpperCase();
+
+              if (t === "STAFF_CALL") return undefined;
+              return acceptModalItem.cartPrice !== undefined
                 ? `${acceptModalItem.cartPrice.toLocaleString("ko-KR")}원`
-                : undefined
-            }
+                : undefined;
+            })()}
             onCancelAccept={() => void handleModalCancelAccept()}
+            onCancelOrder={() => void handleAcceptModalCancelOrder()}
             onSlideComplete={
-              String(acceptModalItem.callType ?? "").trim().toUpperCase() ===
-              "PAYMENT_CONFIRM"
+              String(acceptModalItem.callType ?? "")
+                .trim()
+                .toUpperCase() === "PAYMENT_CONFIRM"
                 ? () => void handlePaymentConfirmOrdered()
                 : () => void handleStaffCallCompleted()
             }
@@ -485,6 +597,7 @@ const ServingPage = () => {
             tableNumberText={serveModalItem.tableNumber}
             onClickComplete={() => void handleServeComplete()}
             onCancelAccept={() => void handleServeCancel()}
+            onCancelOrder={() => void handleServeCancelAndOrderCancel()}
           />
         </S.AcceptModalLayer>
       )}
