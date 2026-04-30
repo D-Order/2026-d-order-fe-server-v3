@@ -66,6 +66,12 @@ export const TableCall = styled.div<{ $active: boolean }>`
     $active ? theme.colors.Black01 : theme.colors.Focused};
 `;
 
+export const TableMeta = styled.div<{ $active: boolean }>`
+  ${({ theme }) => theme.fonts.Bold12};
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.Black01 : theme.colors.Focused};
+`;
+
 // tsx에서 $recent를 넘겨주지 않으므로 $active만 받도록 수정
 export const TableWaiting = styled.div<{ $active: boolean }>`
   width: fit-content;

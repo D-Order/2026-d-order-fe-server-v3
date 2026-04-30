@@ -6,14 +6,39 @@ export interface ServingTaskResponse {
   orderItemId: number;
   /** 일부 WS/조회 응답에 테이블 번호가 포함될 수 있음 */
   tableNumber?: number;
+  menuName?: string;
+  quantity?: number;
   status: string;
   requestedAt: string;
+}
+
+export interface ServingFilterMenuOption {
+  id: number;
+  name: string;
+}
+
+export interface ServingFilterOptionsData {
+  menus: ServingFilterMenuOption[];
+  tableCount: number;
+  tables: number[];
+}
+
+export interface ServingFilterOptionsResponse {
+  message: string;
+  data: ServingFilterOptionsData;
 }
 
 // 1. 운영자 서빙 대기 목록 조회 API
 export const getServingCalls = async () => {
   const response = await instance.get<ServingTaskResponse[]>(
     `/api/v3/spring/serving/servingcall`
+  );
+  return response.data;
+};
+
+export const getServingFilterOptions = async (): Promise<ServingFilterOptionsResponse> => {
+  const response = await instance.get<ServingFilterOptionsResponse>(
+    "/api/v3/spring/serving/filter-options"
   );
   return response.data;
 };
