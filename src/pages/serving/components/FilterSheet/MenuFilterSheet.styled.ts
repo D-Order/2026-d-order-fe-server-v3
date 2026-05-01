@@ -23,7 +23,7 @@ export const SheetContainer = styled.div`
   max-width: 500px; /* 모바일 환경 고려 */
   background-color: ${({ theme }) => theme.colors?.White || "#FFFFFF"};
   border-radius: 1.5rem 1.5rem 0 0;
-  padding: 1rem 1.5rem 2rem 1.5rem;
+  padding: 0.5rem 1.5rem 2rem 1.5rem;
   box-sizing: border-box;
   animation: ${slideUp} 0.3s ease-out;
   display: flex;
@@ -41,7 +41,7 @@ export const HandleBar = styled.div`
 export const Title = styled.h2`
   font: ${({ theme }) => theme.fonts?.Bold20 || "700 20px sans-serif"};
   color: ${({ theme }) => theme.colors?.Black || "#000000"};
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
 `;
 
 export const GridContainer = styled.div`
@@ -64,14 +64,15 @@ export const GridContainer = styled.div`
 `;
 
 export const MenuItem = styled.button<{ $isSelected: boolean }>`
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 7 / 5.2;
   border-radius: 0.75rem;
   background-color: ${({ $isSelected, theme }) =>
-    $isSelected ? theme.colors?.Orange01 || "#FF6B00" : "#F8F8F8"};
+    $isSelected ? theme.colors?.Orange00 : "#FAFAFA"};
   color: ${({ $isSelected, theme }) =>
-    $isSelected ? theme.colors?.White || "#FFFFFF" : "#A0A0A0"};
-  border: none;
-  font: ${({ theme }) => theme.fonts?.SemiBold14 || "600 14px sans-serif"};
+    $isSelected ? theme.colors?.Black02 : "#C0C0C0"};
+  border: 1px solid ${({ $isSelected, theme }) =>
+    $isSelected ? theme.colors?.Orange01 : "#FAFAFA"};
+  font: ${({ theme }) => theme.fonts?.SemiBold14};
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -102,10 +103,10 @@ export const SubmitButton = styled.button<{ $active: boolean }>`
 // 가로 스크롤 및 숨김 처리
 export const SelectedListScroll = styled.div`
   display: flex;
-  gap: 8px;
+  gap: 0.75rem;
   overflow-x: auto;
   white-space: nowrap;
-  padding-bottom: 8px;
+  padding-bottom: 1rem;
 
   /* 스크롤바 숨기기 (선택사항) */
   &::-webkit-scrollbar {
@@ -116,18 +117,26 @@ export const SelectedListScroll = styled.div`
 export const SelectedPill = styled.div`
   display: flex;
   align-items: center;
-  padding: 4px 12px;
+  padding: 8px 10px;
+  gap : 0.2rem;
   border: 1px solid #ff5c39; /* 메인 테마색 */
-  color: #ff5c39;
-  border-radius: 16px;
-  font-size: 14px;
+  color: ${({ theme }) => theme.colors?.Orange01};
+  border-radius: 0.6rem;
+  font: ${({ theme }) => theme.fonts?.Bold14};
 `;
 
 export const PillDeleteBtn = styled.button`
+  display: flex;
+  justify-content : center;
+  align-items: center;
   margin-left: 6px;
-  background: none;
-  border: none;
   color: #c4c4c4;
   cursor: pointer;
-  /* 아이콘 세부 스타일 지정 */
+  background-color: #c0c0c0;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 1rem;
+  font-size: 0.65rem;
+  color: white;
+  font-weight: bold;
 `;

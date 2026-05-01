@@ -1,15 +1,30 @@
 import * as S from "./StaffServe.styled";
 
-const getOrderElapsedText = (dateString?: string): string => {
-  if (!dateString) return "주문 시간 확인 불가";
-  const orderedTime = new Date(dateString).getTime();
-  if (Number.isNaN(orderedTime)) return "주문 시간 확인 불가";
+const parseServerDate = (dateString?: string): Date | null => {
+  if (!dateString) return null;
 
-  const diffMs = Date.now() - orderedTime;
+  const trimmed = dateString.trim();
+  if (!trimmed) return null;
+
+  const hasTimezone = /(?:Z|[+-]\d{2}:\d{2})$/.test(trimmed);
+  const normalized = hasTimezone ? trimmed : `${trimmed}Z`;
+  const date = new Date(normalized);
+
+  if (Number.isNaN(date.getTime())) return null;
+
+  return date;
+};
+
+const getOrderElapsedText = (dateString?: string): string => {
+  const requestedDate = parseServerDate(dateString);
+
+  if (!requestedDate) return "주문 시간 확인 불가";
+
+  const diffMs = Date.now() - requestedDate.getTime();
   const diffMinutes = Math.floor(diffMs / 1000 / 60);
 
-  if (diffMinutes < 1) return "방금 전 주문";
-  return `${diffMinutes}분 전 주문`;
+  if (diffMinutes < 1) return "방금 전";
+  return `${diffMinutes}분 전`;
 };
 
 interface StaffServeItemProps {
@@ -39,8 +54,9 @@ const StaffServeItem = ({
         <S.Table>
           <S.TableNumber $active={active}>{tableNumber}</S.TableNumber>
           <S.TableCall $active={active}>{menuName}</S.TableCall>
+          <S.TableMeta $active={active}>{quantity}개</S.TableMeta>
         </S.Table>
-        <S.TableMeta $active={active}>수량 {quantity}개</S.TableMeta>
+        
         <S.TableWaiting $active={active}>{getOrderElapsedText(requestedAt)}</S.TableWaiting>
       </S.LeftSection>
       <S.StaffCallButton
