@@ -46,13 +46,14 @@ export const Table = styled.div`
   height: fit-content;
   display: flex;
   flex-direction: row;
-  gap: 1.5rem;
+  // gap: 1rem;
   align-items: center;
 `;
 
 export const TableNumber = styled.div<{ $active: boolean }>`
   width: fit-content;
   height: fit-content;
+  margin-right: 1rem;
   ${({ theme }) => theme.fonts.SemiBold14};
   color: ${({ $active, theme }) =>
     $active ? theme.colors.Orange01 : theme.colors.Focused};
@@ -61,13 +62,14 @@ export const TableNumber = styled.div<{ $active: boolean }>`
 export const TableCall = styled.div<{ $active: boolean }>`
   width: fit-content;
   height: fit-content;
+  margin-right: 0.3rem;
   ${({ theme }) => theme.fonts.Bold18};
   color: ${({ $active, theme }) =>
     $active ? theme.colors.Black01 : theme.colors.Focused};
 `;
 
 export const TableMeta = styled.div<{ $active: boolean }>`
-  ${({ theme }) => theme.fonts.Bold12};
+  ${({ theme }) => theme.fonts.Bold18};
   color: ${({ $active, theme }) =>
     $active ? theme.colors.Black01 : theme.colors.Focused};
 `;
