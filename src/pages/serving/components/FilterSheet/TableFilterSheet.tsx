@@ -75,7 +75,9 @@ const TableFilterSheet = ({ onClose, tableOptions, initialRanges, onApply }: Tab
     };
 
     const removeRange = (index: number) => {
-        setRanges((prev) => prev.filter((_, i) => i !== index));
+        const next = ranges.filter((_, i) => i !== index);
+        setRanges(next);
+        onApply(next);
     };
 
     const handleComplete = () => {
