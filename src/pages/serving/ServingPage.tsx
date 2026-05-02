@@ -317,13 +317,13 @@ const ServingPage = () => {
       acceptModalAutoCloseTimeoutRef.current = null;
     }
 
-    acceptModalAutoCloseTimeoutRef.current = setTimeout(() => {
-      setAcceptModalItem((prev) => {
-        if (!prev) return prev;
-        return null;
-      });
-      acceptModalAutoCloseTimeoutRef.current = null;
-    }, 7000);
+    // acceptModalAutoCloseTimeoutRef.current = setTimeout(() => {
+    //   setAcceptModalItem((prev) => {
+    //     if (!prev) return prev;
+    //     return null;
+    //   });
+    //   acceptModalAutoCloseTimeoutRef.current = null;
+    // }, 7000);
   };
 
   const handleModalCancelAccept = async () => {
@@ -387,9 +387,7 @@ const ServingPage = () => {
     try {
       await serverOrderCancelApi({ staffCallId: staffCallIdCandidate });
 
-      setStaffCallList((prev) =>
-        prev.filter((v) => v.id !== item.id)
-      );
+      setStaffCallList((prev) => prev.filter((v) => v.id !== item.id));
       setStaffCallTotal((prev) => Math.max(prev - 1, 0));
 
       setAcceptModalItem(null);
@@ -600,7 +598,9 @@ const ServingPage = () => {
               return false;
             }
 
-            setToastMessage(result.payload?.message || "테이블이 초기화되었습니다.");
+            setToastMessage(
+              result.payload?.message || "테이블이 초기화되었습니다."
+            );
             setToastType("default");
             return true;
           }}
