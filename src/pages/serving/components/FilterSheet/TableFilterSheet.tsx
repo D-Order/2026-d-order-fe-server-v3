@@ -19,21 +19,49 @@ interface TableFilterSheetProps {
     onApply: (ranges: Range[]) => void;
 }
 
-const toMergedRanges = (ranges: NumericRange[]): NumericRange[] => {
-    const sorted = ranges
-        .map((range) => ({ start: Math.min(range.start, range.end), end: Math.max(range.start, range.end) }))
-        .sort((a, b) => a.start - b.start);
+const normalizeRange = (range: NumericRange): NumericRange => ({
+    start: Math.min(range.start, range.end),
+    end: Math.max(range.start, range.end),
+});
 
-    return sorted.reduce<NumericRange[]>((acc, cur) => {
-        const last = acc[acc.length - 1];
-        if (!last) return [cur];
-        if (cur.start <= last.end + 1) {
-        last.end = Math.max(last.end, cur.end);
-        return acc;
+const intersectRange = (existing: NumericRange, incoming: NumericRange): NumericRange | null => {
+    const current = normalizeRange(existing);
+    const next = normalizeRange(incoming);
+    const start = Math.max(current.start, next.start);
+    const end = Math.min(current.end, next.end);
+
+    if (start > end) return null;
+
+    return { start, end };
+};
+
+const applyNarrowingRange = (existingRanges: NumericRange[], incomingRange: NumericRange): NumericRange[] => {
+    const normalizedIncoming = normalizeRange(incomingRange);
+
+    if (existingRanges.length === 0) {
+        return [normalizedIncoming];
+    }
+
+    const nextRanges: NumericRange[] = [];
+    let hasIntersection = false;
+
+    existingRanges.forEach((range) => {
+        const intersection = intersectRange(range, normalizedIncoming);
+
+        if (intersection) {
+            nextRanges.push(intersection);
+            hasIntersection = true;
+            return;
         }
-        acc.push(cur);
-        return acc;
-    }, []);
+
+        nextRanges.push(normalizeRange(range));
+    });
+
+    if (!hasIntersection) {
+        nextRanges.push(normalizedIncoming);
+    }
+
+    return nextRanges.sort((a, b) => a.start - b.start);
 };
 
 const TableFilterSheet = ({ onClose, tableOptions, initialRanges, onApply }: TableFilterSheetProps) => {
@@ -87,12 +115,11 @@ const TableFilterSheet = ({ onClose, tableOptions, initialRanges, onApply }: Tab
         .map((r) => ({ start: Number(r.start), end: Number(r.end) }))
         .filter((r) => Number.isInteger(r.start) && Number.isInteger(r.end));
 
-        if (isValidRangeInput) {
-        numericRanges.push({ start: Number(startTable), end: Number(endTable) });
-        }
+        const nextRanges = isValidRangeInput
+            ? applyNarrowingRange(numericRanges, { start: Number(startTable), end: Number(endTable) })
+            : numericRanges.map(normalizeRange).sort((a, b) => a.start - b.start);
 
-        const mergedRanges = toMergedRanges(numericRanges);
-        onApply(mergedRanges.map((range) => ({ start: String(range.start), end: String(range.end) })));
+        onApply(nextRanges.map((range) => ({ start: String(range.start), end: String(range.end) })));
         onClose();
     };
 
