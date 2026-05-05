@@ -59,7 +59,7 @@ const StaffCallList = (StaffCallListProps: StaffCallListProps) => {
           <S.NoDataText>
             호출이 없어요...
             <br />
-            이참이 쉬어볼까요?
+            이참에 쉬어볼까요?
           </S.NoDataText>
         </S.NoDataWrapper>
       )}

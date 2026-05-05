@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import * as S from "./StaffServe.styled";
 import components from "../index";
 import StaffServeList from "./StaffServeList";
@@ -22,6 +22,8 @@ export interface StaffServeUIItem {
 }
 
 interface StaffServeProps {
+  /** 비활성 탭에서는 WS 연결 종료만 하고 패널은 유지할 때 false */
+  servingWsEnabled?: boolean;
   onUpdateServeCount?: (count: number) => void;
   onAcceptServe?: (taskId: number, tableNumber: string, orderItemId: number) => void;
 }
@@ -32,7 +34,11 @@ const getMenuFilterLabel = (selectedMenus: string[]): string | undefined => {
   return `${selectedMenus[0]} 외 ${selectedMenus.length - 1}건`;
 };
 
-const StaffServe = ({ onUpdateServeCount, onAcceptServe }: StaffServeProps) => {
+const StaffServe = ({
+  servingWsEnabled = true,
+  onUpdateServeCount,
+  onAcceptServe,
+}: StaffServeProps) => {
   const [isMenuFilterOpen, setIsMenuFilterOpen] = useState(false);
   const [isTableFilterOpen, setIsTableFilterOpen] = useState(false);
 
@@ -79,8 +85,32 @@ const StaffServe = ({ onUpdateServeCount, onAcceptServe }: StaffServeProps) => {
     fetchInitialData();
   }, [mapToUIModel]);
 
+  /** 탭 이탈 시 WS만 끄고 패널을 유지하므로, 다시 활성화될 때 목록만 동기화 */
+  const prevServingWsEnabledRef = useRef<boolean | null>(null);
+  useEffect(() => {
+    const prev = prevServingWsEnabledRef.current;
+    prevServingWsEnabledRef.current = servingWsEnabled;
+    if (!servingWsEnabled) return;
+    if (prev !== false) return;
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const servingRes = await getServingCalls();
+        if (cancelled || !Array.isArray(servingRes)) return;
+        setStaffServeList(servingRes.map(mapToUIModel));
+      } catch (error) {
+        console.error("서빙 목록 재동기화 실패:", error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [servingWsEnabled, mapToUIModel]);
+
   useServingWebSocket({
-    enabled: true,
+    enabled: servingWsEnabled,
     onMessage: (payload: ServingWsPayload) => {
       setStaffServeList((prevList) => {
         switch (payload.type) {

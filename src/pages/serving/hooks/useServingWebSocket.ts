@@ -94,10 +94,6 @@ export const useServingWebSocket = ({
       }
     };
 
-    ws.onerror = (event) => {
-      console.error("❌ [ServingWS] 웹소켓 에러 발생:", event);
-    };
-
     ws.onclose = (event) => {
       console.log("🔴 [ServingWS] 웹소켓 연결 끊김", {
         code: event.code,

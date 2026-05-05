@@ -1,5 +1,5 @@
 import * as S from "./ServingPage.styled";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 import components from "./components";
 import type { StaffCallRowItem } from "./components/StaffCallList/StaffCallList";
@@ -35,7 +35,13 @@ const ServingPage = () => {
   const [activeTab, setActiveTab] = useState<"StaffCall" | "StaffServe">(
     "StaffServe"
   );
+  /** 직원 호출 패널: 첫 탭 진입까지 마운트 지연으로 초기 부하 분산 */
+  const [staffCallPanelMounted, setStaffCallPanelMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    if (activeTab === "StaffCall") setStaffCallPanelMounted(true);
+  }, [activeTab]);
   const [isTableResetOpen, setIsTableResetOpen] = useState(false);
 
   const [nowTick, setNowTick] = useState(() => Date.now());
@@ -247,9 +253,9 @@ const ServingPage = () => {
     },
   });
 
-  const handleTabChange = (tab: "StaffCall" | "StaffServe") => {
+  const handleTabChange = useCallback((tab: "StaffCall" | "StaffServe") => {
     setActiveTab(tab);
-  };
+  }, []);
 
   const handleAccept = async (payload: {
     tableId: number;
@@ -317,13 +323,13 @@ const ServingPage = () => {
       acceptModalAutoCloseTimeoutRef.current = null;
     }
 
-    acceptModalAutoCloseTimeoutRef.current = setTimeout(() => {
-      setAcceptModalItem((prev) => {
-        if (!prev) return prev;
-        return null;
-      });
-      acceptModalAutoCloseTimeoutRef.current = null;
-    }, 7000);
+    // acceptModalAutoCloseTimeoutRef.current = setTimeout(() => {
+    //   setAcceptModalItem((prev) => {
+    //     if (!prev) return prev;
+    //     return null;
+    //   });
+    //   acceptModalAutoCloseTimeoutRef.current = null;
+    // }, 7000);
   };
 
   const handleModalCancelAccept = async () => {
@@ -387,9 +393,7 @@ const ServingPage = () => {
     try {
       await serverOrderCancelApi({ staffCallId: staffCallIdCandidate });
 
-      setStaffCallList((prev) =>
-        prev.filter((v) => v.id !== item.id)
-      );
+      setStaffCallList((prev) => prev.filter((v) => v.id !== item.id));
       setStaffCallTotal((prev) => Math.max(prev - 1, 0));
 
       setAcceptModalItem(null);
@@ -410,26 +414,29 @@ const ServingPage = () => {
     }
   };
 
-  const handleServeCatch = async (
-    taskId: number,
-    tableNumber: string,
-    orderItemId: number
-  ) => {
-    try {
-      const resMsg = await servingCatchApi(taskId);
-      setToastMessage(resMsg || "서빙을 시작합니다.");
-      setToastType("default");
+  const handleServeCatch = useCallback(
+    async (
+      taskId: number,
+      tableNumber: string,
+      orderItemId: number
+    ) => {
+      try {
+        const resMsg = await servingCatchApi(taskId);
+        setToastMessage(resMsg || "서빙을 시작합니다.");
+        setToastType("default");
 
-      setServeModalItem({ taskId, tableNumber, orderItemId });
-    } catch (err: any) {
-      setToastMessage(
-        err?.response?.data?.message ||
-          err?.message ||
-          "서빙 수락 중 오류가 발생했습니다."
-      );
-      setToastType("error");
-    }
-  };
+        setServeModalItem({ taskId, tableNumber, orderItemId });
+      } catch (err: any) {
+        setToastMessage(
+          err?.response?.data?.message ||
+            err?.message ||
+            "서빙 수락 중 오류가 발생했습니다."
+        );
+        setToastType("error");
+      }
+    },
+    []
+  );
 
   const handleServeComplete = async () => {
     if (!serveModalItem) return;
@@ -553,23 +560,32 @@ const ServingPage = () => {
       />
 
       <S.MainContent>
-        {activeTab === "StaffServe" && (
+        <S.TabPanel
+          $visible={activeTab === "StaffServe"}
+          role="tabpanel"
+          aria-hidden={activeTab !== "StaffServe"}
+        >
           <StaffServe
+            servingWsEnabled={activeTab === "StaffServe"}
             onUpdateServeCount={setServeCount}
-            onAcceptServe={(taskId, tableNumber, orderItemId) =>
-              handleServeCatch(taskId, tableNumber, orderItemId)
-            }
+            onAcceptServe={handleServeCatch}
           />
-        )}
+        </S.TabPanel>
 
-        {activeTab === "StaffCall" && (
-          <components.StaffCallList
-            StaffCallList={StaffCallList}
-            nowTick={nowTick}
-            onRefresh={requestStaffCallList}
-            refreshing={isStaffCallRefreshing}
-            onRequestAccept={(item) => void handleRequestAccept(item)}
-          />
+        {staffCallPanelMounted && (
+          <S.TabPanel
+            $visible={activeTab === "StaffCall"}
+            role="tabpanel"
+            aria-hidden={activeTab !== "StaffCall"}
+          >
+            <components.StaffCallList
+              StaffCallList={StaffCallList}
+              nowTick={nowTick}
+              onRefresh={requestStaffCallList}
+              refreshing={isStaffCallRefreshing}
+              onRequestAccept={(item) => void handleRequestAccept(item)}
+            />
+          </S.TabPanel>
         )}
       </S.MainContent>
 
@@ -600,7 +616,9 @@ const ServingPage = () => {
               return false;
             }
 
-            setToastMessage(result.payload?.message || "테이블이 초기화되었습니다.");
+            setToastMessage(
+              result.payload?.message || "테이블이 초기화되었습니다."
+            );
             setToastType("default");
             return true;
           }}

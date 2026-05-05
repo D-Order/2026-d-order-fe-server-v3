@@ -55,4 +55,6 @@ export const Title = styled.h1`
 export const ExitBtn = styled.img`
   width: 20px;
   height: 20px;
+
+  cursor: pointer;
 `;
