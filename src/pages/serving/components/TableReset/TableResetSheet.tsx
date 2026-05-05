@@ -28,7 +28,7 @@ const TableResetSheet = ({ onClose, onSubmit, validTables, onInvalidSubmit }: Ta
 
   const handleSubmit = async () => {
     if (!isValidTableNumber) {
-      onInvalidSubmit?.("유효하지 않은 테이블 번호입니다.");
+      onInvalidSubmit?.("주문 내역이 없는 테이블 번호입니다");
       return;
     }
 

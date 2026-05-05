@@ -16,12 +16,16 @@ interface UseTableResetResult {
 }
 
 const getTableResetErrorMessage = (error: any) => {
+  if (error?.response?.status === 400) {
+    return "주문 내역이 없는 테이블 번호입니다";
+  }
+
   return (
     error?.response?.data?.message ||
     error?.response?.data?.detail ||
     error?.response?.data?.error ||
     error?.message ||
-    "유효하지 않은 테이블입니다. 테이블 번호를 다시 확인해주세요."
+    "에러가 발생했습니다."
   );
 };
 
