@@ -472,30 +472,6 @@ const ServingPage = () => {
     }
   };
 
-  const handleServeCancelAndOrderCancel = async () => {
-    if (!serveModalItem) return;
-
-    if (!Number.isFinite(serveModalItem.taskId) || serveModalItem.taskId <= 0) {
-      setToastMessage("taskId가 없어 주문 취소를 진행할 수 없습니다.");
-      setToastType("error");
-      return;
-    }
-
-    try {
-      await serverOrderCancelApi({ staffCallId: serveModalItem.taskId });
-      setServeModalItem(null);
-      setToastMessage("주문이 취소되었습니다.");
-      setToastType("default");
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "주문 취소 중 오류가 발생했습니다.";
-      setToastMessage(msg);
-      setToastType("error");
-    }
-  };
-
   const handleStaffCallCompleted = async () => {
     if (!acceptModalItem) return;
 
@@ -668,7 +644,6 @@ const ServingPage = () => {
             tableNumberText={serveModalItem.tableNumber}
             onClickComplete={() => void handleServeComplete()}
             onCancelAccept={() => void handleServeCancel()}
-            onCancelOrder={() => void handleServeCancelAndOrderCancel()}
           />
         </S.AcceptModalLayer>
       )}

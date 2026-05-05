@@ -15,11 +15,11 @@ const CLICK_COMPLETE_TRANSITION_MS = 220;
 type HeaderProps = {
   onLeft: () => void;
   onCancelOrder?: () => void;
-  showCancelOrder?: boolean;
+  showCancelOrder: boolean;
 };
 
 const ModalHeader = memo(
-  ({ onLeft, onCancelOrder, showCancelOrder = true }: HeaderProps) => {
+  ({ onLeft, onCancelOrder, showCancelOrder }: HeaderProps) => {
     return (
       <S.TopSection>
         <S.TopSectionCloseBtn
@@ -28,17 +28,8 @@ const ModalHeader = memo(
           onClick={onLeft}
           role="button"
         />
-        {showCancelOrder && (
-          <S.TopSectionRejectBtn
-            type="button"
-            onClick={() => {
-              console.log("[ServingAcceptModal] 주문 취소 클릭", {
-                hasOnCancelOrder: typeof onCancelOrder === "function",
-                showCancelOrder,
-              });
-              onCancelOrder?.();
-            }}
-          >
+        {showCancelOrder && onCancelOrder && (
+          <S.TopSectionRejectBtn type="button" onClick={onCancelOrder}>
             주문 취소
           </S.TopSectionRejectBtn>
         )}
@@ -302,14 +293,6 @@ const ServingAcceptModal = ({
       .toUpperCase();
     return t === "STAFF_CALL";
   }, [callType]);
-
-  useEffect(() => {
-    console.log("[ServingAcceptModal] render", {
-      callType: callType ?? null,
-      isStaffCall,
-      showCancelOrder: !isStaffCall,
-    });
-  }, [callType, isStaffCall]);
 
   const effectiveVariant = callType?.trim()
     ? servingAcceptVariantForCallType(callType)
