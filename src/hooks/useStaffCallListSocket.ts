@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const LIST_PAYLOAD = { type: "LIST" as const, limit: 20, offset: 0 };
+const PING_PAYLOAD = { type: "PING" as const };
+
+/** 권장: 30~60초 */
+const PING_INTERVAL_MS = 30_000;
+/** 권장: 3~5초 — 중간값 */
+const PONG_DEADLINE_MS = 3_000;
+const RECONNECT_DELAY_MS = 1_500;
 
 /** `VITE_BASE_URL`(https://host) → `wss://host/ws/server/staffcall` */
 export function getStaffCallServerWebSocketUrl(): string {
@@ -27,6 +34,7 @@ interface UseStaffCallListSocketOptions {
 /**
  * 직원 호출 목록: wss://…/ws/server/staffcall
  * - 연결 후 LIST 전송, LIST_RESULT / STAFF_CALL_SNAPSHOT 으로 목록 갱신
+ * - 주기적 PING / PONG 하트비트, PONG 지연 시 재연결 후 LIST로 동기화
  */
 export function useStaffCallListSocket(options: UseStaffCallListSocketOptions) {
   const onListUpdateRef = useRef(options.onListUpdate);
@@ -79,73 +87,174 @@ export function useStaffCallListSocket(options: UseStaffCallListSocketOptions) {
       return;
     }
 
-    const ws = new WebSocket(url);
-    wsRef.current = ws;
+    let cancelled = false;
+    let pingIntervalId: ReturnType<typeof setInterval> | null = null;
+    let pongDeadlineId: ReturnType<typeof setTimeout> | null = null;
+    let reconnectId: ReturnType<typeof setTimeout> | null = null;
 
-    ws.onopen = () => {
-      setIsConnected(true);
-      setIsRefreshing(true);
-      ws.send(JSON.stringify(LIST_PAYLOAD));
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        console.log("[StaffCallWS] raw message:", event.data);
-        const msg = JSON.parse(event.data as string) as {
-          type?: string;
-          data?: unknown;
-          total?: number;
-          staff_call_id?: unknown;
-          status?: unknown;
-        };
-        console.log("[StaffCallWS] parsed:", msg);
-
-        if (msg.type === "LIST_RESULT" || msg.type === "STAFF_CALL_SNAPSHOT") {
-          const data = Array.isArray(msg.data) ? msg.data : [];
-          onListUpdateRef.current({
-            items: data,
-            total: typeof msg.total === "number" ? msg.total : undefined,
-          });
-          setIsRefreshing(false);
-          return;
-        }
-
-        // 단건 상태 이벤트(구독 기반): DELETED 등
-        if (msg.type === "STAFF_CALL_STATUS") {
-          const status = String((msg as any)?.status ?? "")
-            .trim()
-            .toUpperCase();
-          const staffCallId = Number((msg as any)?.staff_call_id);
-          console.log("[StaffCallWS] status event:", { staffCallId, status });
-
-          // DELETED는 LIST_RESULT로 반영되도록 즉시 목록 갱신
-          if (status === "DELETED") {
-            setIsRefreshing(true);
-            sendList();
-          }
-          return;
-        }
-      } catch {
-        onErrorRef.current?.("목록 메시지를 처리하지 못했습니다.");
-        setIsRefreshing(false);
+    const clearPingInterval = () => {
+      if (pingIntervalId != null) {
+        clearInterval(pingIntervalId);
+        pingIntervalId = null;
       }
     };
 
-    ws.onerror = () => {
-      onErrorRef.current?.("직원 호출 연결 오류");
-      setIsRefreshing(false);
+    const clearPongDeadline = () => {
+      if (pongDeadlineId != null) {
+        clearTimeout(pongDeadlineId);
+        pongDeadlineId = null;
+      }
     };
 
-    ws.onclose = () => {
-      setIsConnected(false);
-      if (wsRef.current === ws) wsRef.current = null;
+    const clearReconnect = () => {
+      if (reconnectId != null) {
+        clearTimeout(reconnectId);
+        reconnectId = null;
+      }
     };
+
+    const scheduleReconnect = () => {
+      if (cancelled) return;
+      clearReconnect();
+      reconnectId = setTimeout(() => {
+        reconnectId = null;
+        if (!cancelled) connect();
+      }, RECONNECT_DELAY_MS);
+    };
+
+    const sendPingStartWatchdog = (ws: WebSocket) => {
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      clearPongDeadline();
+      try {
+        ws.send(JSON.stringify(PING_PAYLOAD));
+      } catch {
+        try {
+          ws.close();
+        } catch {
+          /* ignore */
+        }
+        scheduleReconnect();
+        return;
+      }
+      pongDeadlineId = setTimeout(() => {
+        pongDeadlineId = null;
+        if (cancelled) return;
+        if (wsRef.current !== ws) return;
+
+        try {
+          ws.close();
+        } catch {
+          /* ignore */
+        }
+        // onclose에서도 재연결되지만, 이벤트 순서에 의존하지 않고 명시적으로 시도
+        scheduleReconnect();
+      }, PONG_DEADLINE_MS);
+    };
+
+    const connect = () => {
+      if (cancelled) return;
+
+      clearPingInterval();
+      clearPongDeadline();
+      clearReconnect();
+
+      const ws = new WebSocket(url);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        setIsConnected(true);
+        setIsRefreshing(true);
+        ws.send(JSON.stringify(LIST_PAYLOAD));
+
+        clearPingInterval();
+        pingIntervalId = setInterval(() => {
+          if (cancelled || ws.readyState !== WebSocket.OPEN) return;
+          sendPingStartWatchdog(ws);
+        }, PING_INTERVAL_MS);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          console.log("[StaffCallWS] raw message:", event.data);
+          const msg = JSON.parse(event.data as string) as {
+            type?: string;
+            data?: unknown;
+            total?: number;
+            staff_call_id?: unknown;
+            status?: unknown;
+          };
+          console.log("[StaffCallWS] parsed:", msg);
+
+          if (String(msg.type ?? "").toUpperCase() === "PONG") {
+            clearPongDeadline();
+            return;
+          }
+
+          if (
+            msg.type === "LIST_RESULT" ||
+            msg.type === "STAFF_CALL_SNAPSHOT"
+          ) {
+            const data = Array.isArray(msg.data) ? msg.data : [];
+            onListUpdateRef.current({
+              items: data,
+              total: typeof msg.total === "number" ? msg.total : undefined,
+            });
+            setIsRefreshing(false);
+            return;
+          }
+
+          if (msg.type === "STAFF_CALL_STATUS") {
+            const status = String((msg as any)?.status ?? "")
+              .trim()
+              .toUpperCase();
+
+            console.log("[StaffCallWS] status event:", {
+              staffCallId: Number((msg as any)?.staff_call_id),
+              status,
+            });
+
+            if (status === "DELETED") {
+              setIsRefreshing(true);
+              sendList();
+            }
+            return;
+          }
+        } catch {
+          onErrorRef.current?.("목록 메시지를 처리하지 못했습니다.");
+          setIsRefreshing(false);
+        }
+      };
+
+      ws.onerror = () => {
+        onErrorRef.current?.("직원 호출 연결 오류");
+        setIsRefreshing(false);
+      };
+
+      ws.onclose = () => {
+        clearPingInterval();
+        clearPongDeadline();
+        setIsConnected(false);
+
+        const wasActive = wsRef.current === ws;
+        if (wasActive) wsRef.current = null;
+
+        if (!cancelled && wasActive) {
+          scheduleReconnect();
+        }
+      };
+    };
+
+    connect();
 
     return () => {
-      ws.close();
-      if (wsRef.current === ws) wsRef.current = null;
+      cancelled = true;
+      clearPingInterval();
+      clearPongDeadline();
+      clearReconnect();
+      wsRef.current?.close();
+      if (wsRef.current) wsRef.current = null;
     };
-  }, [options.enabled]);
+  }, [options.enabled, sendList]);
 
   return { isConnected, isRefreshing, requestList };
 }
