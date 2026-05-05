@@ -11,6 +11,8 @@ export const Label = styled.label<{ $error?: boolean }>`
   color: ${({ $error, theme }) =>
     $error ? theme.colors.Error : theme.colors.Orange01};
   margin-bottom: 10px;
+
+  ${({ theme }) => theme.fonts.SemiBold16};
 `;
 
 export const InputBox = styled.div<{ $error?: boolean }>`
@@ -31,13 +33,13 @@ export const Input = styled.input`
   flex: 1;
   border: none;
   background: transparent;
-  font: ${({ theme }) => theme.fonts.SemiBold16};
+  ${({ theme }) => theme.fonts.SemiBold16};
   color: ${({ theme }) => theme.colors.Black02};
   outline: none;
 
   &::placeholder {
     color: ${({ theme }) => theme.colors.Focused};
-    font: ${({ theme }) => theme.fonts.SemiBold16};
+    ${({ theme }) => theme.fonts.SemiBold16};
   }
 `;
 
