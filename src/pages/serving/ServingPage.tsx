@@ -22,7 +22,6 @@ import {
   servingCatchApi,
   servingCompleteApi,
   servingCancelApi,
-  serverOrderCancelApi,
   getServingFilterOptions,
 } from "./apis/servingApi";
 
@@ -372,48 +371,6 @@ const ServingPage = () => {
     }
   };
 
-  const handleAcceptModalCancelOrder = async () => {
-    const item = acceptModalItem;
-    if (!item) return;
-
-    const staffCallIdCandidate = item.id;
-
-    if (!Number.isFinite(staffCallIdCandidate) || staffCallIdCandidate <= 0) {
-      setToastMessage("staffCallId가 없어 주문 취소를 진행할 수 없습니다.");
-      setToastType("error");
-      return;
-    }
-
-    if (!item.callType?.trim()) {
-      setToastMessage("취소에 필요한 정보가 부족합니다.");
-      setToastType("error");
-      return;
-    }
-
-    try {
-      await serverOrderCancelApi({ staffCallId: staffCallIdCandidate });
-
-      setStaffCallList((prev) => prev.filter((v) => v.id !== item.id));
-      setStaffCallTotal((prev) => Math.max(prev - 1, 0));
-
-      setAcceptModalItem(null);
-      setToastMessage("주문이 취소되었습니다.");
-      setToastType("default");
-
-      if (acceptModalAutoCloseTimeoutRef.current) {
-        clearTimeout(acceptModalAutoCloseTimeoutRef.current);
-        acceptModalAutoCloseTimeoutRef.current = null;
-      }
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "주문 취소 중 오류가 발생했습니다.";
-      setToastMessage(msg);
-      setToastType("error");
-    }
-  };
-
   const handleServeCatch = useCallback(
     async (
       taskId: number,
@@ -468,30 +425,6 @@ const ServingPage = () => {
           err?.message ||
           "서빙 취소 처리 중 오류가 발생했습니다."
       );
-      setToastType("error");
-    }
-  };
-
-  const handleServeCancelAndOrderCancel = async () => {
-    if (!serveModalItem) return;
-
-    if (!Number.isFinite(serveModalItem.taskId) || serveModalItem.taskId <= 0) {
-      setToastMessage("taskId가 없어 주문 취소를 진행할 수 없습니다.");
-      setToastType("error");
-      return;
-    }
-
-    try {
-      await serverOrderCancelApi({ staffCallId: serveModalItem.taskId });
-      setServeModalItem(null);
-      setToastMessage("주문이 취소되었습니다.");
-      setToastType("default");
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "주문 취소 중 오류가 발생했습니다.";
-      setToastMessage(msg);
       setToastType("error");
     }
   };
@@ -649,7 +582,6 @@ const ServingPage = () => {
                 : undefined;
             })()}
             onCancelAccept={() => void handleModalCancelAccept()}
-            onCancelOrder={() => void handleAcceptModalCancelOrder()}
             onSlideComplete={
               String(acceptModalItem.callType ?? "")
                 .trim()
@@ -668,7 +600,6 @@ const ServingPage = () => {
             tableNumberText={serveModalItem.tableNumber}
             onClickComplete={() => void handleServeComplete()}
             onCancelAccept={() => void handleServeCancel()}
-            onCancelOrder={() => void handleServeCancelAndOrderCancel()}
           />
         </S.AcceptModalLayer>
       )}

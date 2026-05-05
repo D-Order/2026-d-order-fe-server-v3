@@ -14,12 +14,10 @@ const CLICK_COMPLETE_TRANSITION_MS = 220;
 
 type HeaderProps = {
   onLeft: () => void;
-  onCancelOrder?: () => void;
-  showCancelOrder?: boolean;
 };
 
 const ModalHeader = memo(
-  ({ onLeft, onCancelOrder, showCancelOrder = true }: HeaderProps) => {
+  ({ onLeft }: HeaderProps) => {
     return (
       <S.TopSection>
         <S.TopSectionCloseBtn
@@ -28,20 +26,6 @@ const ModalHeader = memo(
           onClick={onLeft}
           role="button"
         />
-        {showCancelOrder && (
-          <S.TopSectionRejectBtn
-            type="button"
-            onClick={() => {
-              console.log("[ServingAcceptModal] 주문 취소 클릭", {
-                hasOnCancelOrder: typeof onCancelOrder === "function",
-                showCancelOrder,
-              });
-              onCancelOrder?.();
-            }}
-          >
-            주문 취소
-          </S.TopSectionRejectBtn>
-        )}
       </S.TopSection>
     );
   }
@@ -277,8 +261,6 @@ export interface ServingAcceptModalProps {
   onCancelAccept?: () => void | Promise<void>;
   /** 좌상단 닫기(뒤로) — onCancelAccept가 없을 때만 사용 */
   onClose?: () => void;
-  /** 우상단 주문 취소 */
-  onCancelOrder?: () => void;
   /** 서빙/호출 대상 정보 표시용 (ex: "T4") */
   tableNumberText?: string;
   /** 하단 추가 텍스트 (ex: 금액 등, 없으면 생략) */
@@ -292,25 +274,9 @@ const ServingAcceptModal = ({
   onClickComplete,
   onCancelAccept,
   onClose,
-  onCancelOrder,
   tableNumberText = "테이블",
   extraContentText,
 }: ServingAcceptModalProps) => {
-  const isStaffCall = useMemo(() => {
-    const t = String(callType ?? "")
-      .trim()
-      .toUpperCase();
-    return t === "STAFF_CALL";
-  }, [callType]);
-
-  useEffect(() => {
-    console.log("[ServingAcceptModal] render", {
-      callType: callType ?? null,
-      isStaffCall,
-      showCancelOrder: !isStaffCall,
-    });
-  }, [callType, isStaffCall]);
-
   const effectiveVariant = callType?.trim()
     ? servingAcceptVariantForCallType(callType)
     : variant;
@@ -329,11 +295,7 @@ const ServingAcceptModal = ({
   return (
     <S.Wrapper>
       <S.BackGround />
-      <ModalHeader
-        onLeft={handleLeft}
-        onCancelOrder={onCancelOrder}
-        showCancelOrder={!isStaffCall}
-      />
+      <ModalHeader onLeft={handleLeft} />
       <ModalInfo
         titleLines={titleLines}
         tableNumberText={tableNumberText}
