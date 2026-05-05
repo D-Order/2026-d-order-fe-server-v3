@@ -19,6 +19,15 @@ export const MainContent = styled.div`
   width: 100%;
 `;
 
+/** 탭 전환 시 언마운트하지 않고 숨김 — 서빙 패널·WS·상태 유지로 전체 깜빡임 완화 */
+export const TabPanel = styled.div<{ $visible: boolean }>`
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: ${({ $visible }) => ($visible ? "flex" : "none")};
+  flex-direction: column;
+`;
+
 export const AcceptModalLayer = styled.div`
   position: absolute;
   transform: translate(0, -52px);

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import * as S from "./SelectTap.styled";
 
 import { IMAGE_CONSTANTS } from "@constants/ImageConstants";
@@ -11,7 +12,7 @@ interface SelectTapProps {
   staffCallCount?: number;
 }
 
-const SelectTap = ({
+const SelectTapInner = ({
   activeTab,
   onTabChange,
   staffServeCount = 0,
@@ -36,7 +37,7 @@ const SelectTap = ({
             }
           />
           <S.ButtonText $active={activeTab === "StaffServe"}>
-            서빙요청 ({staffServeCount})
+            서빙 요청 ({staffServeCount})
           </S.ButtonText>
         </S.Button>
         <S.Button
@@ -59,4 +60,5 @@ const SelectTap = ({
   );
 };
 
+const SelectTap = memo(SelectTapInner);
 export default SelectTap;
