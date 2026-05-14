@@ -542,7 +542,6 @@ const ServingPage = () => {
           aria-hidden={activeTab !== "StaffServe"}
         >
           <StaffServe
-            servingWsEnabled={activeTab === "StaffServe"}
             onUpdateServeCount={setServeCount}
             onAcceptServe={handleServeCatch}
           />
