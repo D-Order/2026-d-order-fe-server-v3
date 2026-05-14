@@ -170,9 +170,13 @@ const StaffServe = ({
     });
   }, [staffServeList, selectedMenuNames, selectedTableRanges]);
 
+  const activeStaffServeCount = useMemo(() => {
+    return staffServeList.filter((item) => item.active).length;
+  }, [staffServeList]);
+
   useEffect(() => {
-    onUpdateServeCount?.(filteredStaffServeList.length);
-  }, [filteredStaffServeList, onUpdateServeCount]);
+    onUpdateServeCount?.(activeStaffServeCount);
+  }, [activeStaffServeCount, onUpdateServeCount]);
 
   const selectedMenuName = getMenuFilterLabel(selectedMenuNames);
 
