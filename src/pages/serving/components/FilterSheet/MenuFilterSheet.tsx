@@ -1,7 +1,7 @@
 // components/FilterSheet/MenuFilterSheet.tsx
 import { useState, useEffect } from "react";
 import * as S from "./MenuFilterSheet.styled";
-import { ServingFilterMenuOption } from "../../apis/servingApi";
+import { isVisibleServingFilterMenu, ServingFilterMenuOption } from "../../apis/servingApi";
 
 interface MenuFilterSheetProps {
     onClose: () => void;
@@ -58,7 +58,7 @@ const MenuFilterSheet = ({ onClose, menuOptions, initialSelectedMenus, onApply }
 
                 {/* 메뉴 목록 렌더링 */}
                 <S.GridContainer>
-                    {menuOptions.filter((menu) => menu.name.trim() !== "테이블 이용료").map((menu) => (
+                    {menuOptions.filter(isVisibleServingFilterMenu).map((menu) => (
                             <S.MenuItem
                                 key={menu.id}
                                 $isSelected={selectedMenus.includes(menu.name)}
