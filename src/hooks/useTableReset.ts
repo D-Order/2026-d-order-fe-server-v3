@@ -17,7 +17,7 @@ interface UseTableResetResult {
 
 const getTableResetErrorMessage = (error: any) => {
   if (error?.response?.status === 400) {
-    return "주문 내역이 없는 테이블 번호입니다";
+    return "초기화할 수 없는 테이블입니다";
   }
 
   return (
