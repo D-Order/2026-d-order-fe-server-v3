@@ -5,6 +5,7 @@ import StaffServeList from "./StaffServeList";
 import {
   getServingCalls,
   getServingFilterOptions,
+  isVisibleServingFilterMenu,
   ServingFilterMenuOption,
   ServingTaskResponse,
 } from "../../apis/servingApi";
@@ -71,7 +72,7 @@ const StaffServe = ({
     const fetchInitialData = async () => {
       try {
         const [servingRes, filterOptions] = await Promise.all([getServingCalls(), getServingFilterOptions()]);
-        setMenuList((filterOptions.data.menus ?? []).filter((menu) => menu.name.trim() !== "테이블 이용료"));
+        setMenuList((filterOptions.data.menus ?? []).filter(isVisibleServingFilterMenu));
         setTableOptions(filterOptions.data.tables ?? []);
 
         if (Array.isArray(servingRes)) {
