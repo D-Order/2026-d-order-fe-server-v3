@@ -585,7 +585,7 @@ const ServingPage = () => {
             if (!result.success) {
               setToastMessage(
                 result.errorMsg ||
-                  "주문 내역이 없는 테이블 번호입니다"
+                  "초기화할 수 없는 테이블입니다"
               );
               setToastType("error");
               return false;
