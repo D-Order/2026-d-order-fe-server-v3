@@ -41,20 +41,9 @@ export interface StaffCallCompleteRequest {
   callType: StaffCallType;
 }
 
-const getCookie = (name: string): string | null => {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-  return match ? decodeURIComponent(match[2]) : null;
-};
-
-const withCsrfHeader = () => {
-  const csrfToken = getCookie("csrftoken");
-  return {
-    headers: {
-      ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
-    },
-  };
-};
+// CSRF 토큰 주입은 instance.ts의 request 인터셉터가 자동 처리한다.
+// host-only 쿠키 전환 후 server.dorder-api.shop JS에서 API 호스트 csrftoken을
+// document.cookie로 못 읽기 때문에, 수동 추출이 아닌 인터셉터의 fetchCsrfToken 경로를 써야 한다.
 
 const toWire = (body: {
   tableId: number;
@@ -74,8 +63,7 @@ export const staffCallAcceptApi = async (
 ): Promise<{ message: string; data?: unknown }> => {
   const res = await instance.post(
     `/api/v3/spring/server/accept`,
-    toWire(body),
-    withCsrfHeader()
+    toWire(body)
   );
   return res.data;
 };
@@ -86,8 +74,7 @@ export const staffCallCompleteApi = async (
 ): Promise<{ message: string; data?: unknown }> => {
   const res = await instance.post(
     `/api/v3/spring/server/staffcall/complete`,
-    toWire(body),
-    withCsrfHeader()
+    toWire(body)
   );
   return res.data;
 };
@@ -98,8 +85,7 @@ export const staffCallCancelApi = async (
 ): Promise<{ message: string; data?: unknown }> => {
   const res = await instance.post(
     `/api/v3/spring/server/staffcall/cancel`,
-    toWire(body),
-    withCsrfHeader()
+    toWire(body)
   );
   return res.data;
 };
