@@ -15,7 +15,49 @@ export const instance: AxiosInstance = axios.create({
   timeout: 10000,
 });
 
-// 중복 refresh 방지용 상태
+const isCsrfTokenEndpoint = (url?: string) =>
+  url?.includes("/api/v3/django/auth/csrf-token/");
+
+const isUnsafeMethod = (method?: string) => {
+  const m = (method || "GET").toUpperCase();
+  return !["GET", "HEAD", "OPTIONS", "TRACE"].includes(m);
+};
+
+// 백엔드가 host-only 쿠키로 전환된 이후에도 과거 부모 도메인으로 박힌 잔재 쿠키가
+// 브라우저에 남아 있으면 csrftoken이 두 개가 되어 CSRF 검증이 깨진다.
+// 백엔드 clear_stale_domain_cookies helper가 99% 처리하지만 JS 측에서도 안전망으로 한 번 더.
+const stripStaleCsrfCookies = () => {
+  const past = "expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  const domains = [
+    ".dorder-api.shop",
+    "dorder-api.shop",
+    "dev.dorder-api.shop",
+    ".dev.dorder-api.shop",
+    "prod.dorder-api.shop",
+    ".prod.dorder-api.shop",
+  ];
+  const names = ["csrftoken", "sessionid"];
+  for (const d of domains) {
+    for (const n of names) {
+      document.cookie = `${n}=; ${past}; path=/; domain=${d}`;
+    }
+  }
+};
+
+let cachedCsrfToken: string | null = null;
+
+// instance를 그대로 사용해도 재귀 안 일어남:
+// - GET은 isUnsafeMethod=false라 request 인터셉터에서 CSRF 헤더 주입 안 함
+// - response 인터셉터의 403 retry는 isCsrfTokenEndpoint 체크로 csrf-token endpoint 제외
+const fetchCsrfToken = async (): Promise<string | null> => {
+  stripStaleCsrfCookies();
+  const res = await instance.get("/api/v3/django/auth/csrf-token/");
+  const token = res.data?.csrfToken;
+  cachedCsrfToken = typeof token === "string" ? token : null;
+  return cachedCsrfToken;
+};
+
+// 401 refresh 동기화
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value: unknown) => void;
@@ -27,11 +69,27 @@ const processQueue = (error: AxiosError | null) => {
   failedQueue = [];
 };
 
+// Request: unsafe 메서드일 때 CSRF 토큰 자동 주입
 instance.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => config,
+  async (config: InternalAxiosRequestConfig) => {
+    if (isUnsafeMethod(config.method) && !isCsrfTokenEndpoint(config.url)) {
+      if (!cachedCsrfToken) {
+        try {
+          await fetchCsrfToken();
+        } catch (e) {
+          console.error("CSRF 토큰 사전 발급 실패", e);
+        }
+      }
+      if (cachedCsrfToken) {
+        config.headers["X-CSRFToken"] = cachedCsrfToken;
+      }
+    }
+    return config;
+  },
   (error: AxiosError) => Promise.reject(error)
 );
 
+// Response: 403 CSRF 재시도 + 401 refresh
 instance.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
@@ -42,7 +100,29 @@ instance.interceptors.response.use(
 
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
+      _csrfRetry?: boolean;
     };
+
+    // 403 → CSRF 토큰 재발급 후 1회 재시도 (host-only 전환 시점 잔재 충돌 대응)
+    if (
+      error.response?.status === 403 &&
+      !originalRequest._csrfRetry &&
+      !isCsrfTokenEndpoint(originalRequest.url)
+    ) {
+      originalRequest._csrfRetry = true;
+      try {
+        cachedCsrfToken = null;
+        const token = await fetchCsrfToken();
+        if (token) {
+          originalRequest.headers = originalRequest.headers ?? {};
+          (originalRequest.headers as Record<string, string>)["X-CSRFToken"] =
+            token;
+        }
+        return instance(originalRequest);
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       // refresh 자체가 401 → refresh token도 만료 → 로그인으로
