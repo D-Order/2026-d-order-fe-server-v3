@@ -15,7 +15,31 @@ export interface ServingTaskResponse {
 export interface ServingFilterMenuOption {
   id: number;
   name: string;
+  isSetMenu?: boolean;
+  isSet?: boolean;
+  is_set_menu?: boolean;
+  is_set?: boolean;
+  menuType?: string;
+  type?: string;
+  category?: string;
 }
+
+export const isVisibleServingFilterMenu = (menu: ServingFilterMenuOption) => {
+  const menuName = menu.name.trim();
+  const menuTypes = [menu.menuType, menu.type, menu.category]
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim().toUpperCase());
+
+  const isSetMenu =
+    menu.isSetMenu === true ||
+    menu.isSet === true ||
+    menu.is_set_menu === true ||
+    menu.is_set === true ||
+    menuTypes.some((value) => value.includes("SET")) ||
+    menuName.includes("세트");
+
+  return menuName !== "테이블 이용료" && !isSetMenu;
+};
 
 export interface ServingFilterOptionsData {
   menus: ServingFilterMenuOption[];
