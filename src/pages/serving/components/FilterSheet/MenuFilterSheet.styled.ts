@@ -39,7 +39,7 @@ export const HandleBar = styled.div`
 `;
 
 export const Title = styled.h2`
-  font: ${({ theme }) => theme.fonts?.Bold20 || "700 20px sans-serif"};
+  ${({ theme }) => theme.fonts?.Bold20 || "700 20px sans-serif"};
   color: ${({ theme }) => theme.colors?.Black || "#000000"};
   margin: 0 0 1rem 0;
 `;
@@ -70,9 +70,10 @@ export const MenuItem = styled.button<{ $isSelected: boolean }>`
     $isSelected ? theme.colors?.Orange00 : "#FAFAFA"};
   color: ${({ $isSelected, theme }) =>
     $isSelected ? theme.colors?.Black02 : "#C0C0C0"};
-  border: 1px solid ${({ $isSelected, theme }) =>
-    $isSelected ? theme.colors?.Orange01 : "#FAFAFA"};
-  font: ${({ theme }) => theme.fonts?.SemiBold14};
+  border: 1px solid
+    ${({ $isSelected, theme }) =>
+      $isSelected ? theme.colors?.Orange01 : "#FAFAFA"};
+  ${({ theme }) => theme.fonts?.SemiBold14};
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -91,7 +92,7 @@ export const SubmitButton = styled.button<{ $active: boolean }>`
   background-color: ${({ theme, $active }) =>
     $active ? theme.colors.Orange01 : theme.colors.Black02};
   color: ${({ theme }) => theme.colors?.White || "#FFFFFF"};
-  font: ${({ theme }) => theme.fonts?.Bold16 || "700 16px sans-serif"};
+  ${({ theme }) => theme.fonts?.Bold16 || "700 16px sans-serif"};
   border: none;
   cursor: pointer;
 
@@ -118,16 +119,16 @@ export const SelectedPill = styled.div`
   display: flex;
   align-items: center;
   padding: 8px 10px;
-  gap : 0.2rem;
+  gap: 0.2rem;
   border: 1px solid #ff5c39; /* 메인 테마색 */
   color: ${({ theme }) => theme.colors?.Orange01};
   border-radius: 0.6rem;
-  font: ${({ theme }) => theme.fonts?.Bold14};
+  ${({ theme }) => theme.fonts?.Bold14};
 `;
 
 export const PillDeleteBtn = styled.button`
   display: flex;
-  justify-content : center;
+  justify-content: center;
   align-items: center;
   margin-left: 6px;
   color: #c4c4c4;
